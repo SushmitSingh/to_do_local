@@ -1,0 +1,59 @@
+import 'dart:convert';
+
+import 'package:shelf/shelf.dart';
+import 'package:shelf/shelf_io.dart' as shelf_io;
+import 'package:shelf_cors_headers/shelf_cors_headers.dart';
+import 'package:shelf_router/shelf_router.dart';
+
+final todos = <String>[];
+
+Response getAllTodos(Request request) {
+  final jsonResponse = jsonEncode({'todos': todos});
+  return Response.ok(jsonResponse,
+      headers: {'Content-Type': 'application/json'});
+}
+
+Future<Response> addTodo(Request request) async {
+  try {
+    // Read the request body
+    final requestBody = await request.readAsString();
+
+    // Parse the JSON data
+    final Map<String, dynamic> todoData = jsonDecode(requestBody);
+
+    // Get the task from the parsed data
+    final String task = todoData['task'];
+
+    // Add the task to the todos list
+    todos.add(task);
+
+    // Respond with success
+    return Response.ok('Todo added');
+  } catch (error) {
+    // Handle errors
+    print('Error adding todo: $error');
+    return Response.internalServerError(body: 'Error adding todo');
+  }
+}
+
+void main() {
+  final app = Router();
+
+  app.get('/todos', getAllTodos);
+  app.post('/addTodo', addTodo);
+
+  var handler = const Pipeline()
+      .addMiddleware(corsHeaders(
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+          'Access-Control-Allow-Headers': 'Origin, Content-Type',
+        },
+      ))
+      .addMiddleware(logRequests())
+      .addHandler(app);
+
+  shelf_io.serve(handler, '192.168.137.1', 8080).then((server) {
+    print('Server started on port 8080');
+  });
+}
