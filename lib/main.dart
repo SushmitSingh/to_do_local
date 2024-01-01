@@ -36,22 +36,32 @@ class TodoListScreen extends StatefulWidget {
 class _TodoListScreenState extends State<TodoListScreen> {
   List<String> todos = [];
   late String storePath;
+  final TextEditingController _textController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _initStorePath();
-    _fetchLocalTodos();
-    _processOfflineTodos();
+    _initStorePath().then((path) {
+      _fetchLocalTodos();
+      _processOfflineTodos();
+    });
   }
 
-  Future<void> _initStorePath() async {
-    final appDocumentsDirectory = await getApplicationDocumentsDirectory();
-    storePath = '${appDocumentsDirectory.path}/todos_store.db';
+  Future<String> _initStorePath() async {
+    try {
+      final appDocumentsDirectory = await getApplicationDocumentsDirectory();
+      storePath = '${appDocumentsDirectory.path}/todos_store.db';
+      return storePath;
+    } catch (error) {
+      print('Error initializing storePath: $error');
+      return ''; // Return an empty string or handle the error accordingly
+    }
   }
 
   Future<void> _fetchLocalTodos() async {
     try {
+      await _initStorePath();
+
       final DatabaseFactory dbFactory =
           kIsWeb ? databaseFactoryWeb : databaseFactoryIo;
       final Database db = await dbFactory.openDatabase(storePath);
@@ -75,12 +85,20 @@ class _TodoListScreenState extends State<TodoListScreen> {
 
   Future<void> _saveLocalTodos(List<String> todosToSave) async {
     try {
+      await _initStorePath();
+
       final DatabaseFactory dbFactory =
           kIsWeb ? databaseFactoryWeb : databaseFactoryIo;
       final Database db = await dbFactory.openDatabase(storePath);
 
       final store = stringMapStoreFactory.store('todos');
-      await store.record('todos').put(db, {'todos': todosToSave});
+
+      // Remove duplicates and update local todos list
+      final List<String> uniqueTodosToSave = todosToSave.toSet().toList();
+      await store.record('todos').put(db, {'todos': uniqueTodosToSave});
+
+      // Refresh the list immediately after saving locally
+      _fetchLocalTodos();
     } catch (error) {
       print('Error saving local todos: $error');
     }
@@ -88,8 +106,7 @@ class _TodoListScreenState extends State<TodoListScreen> {
 
   Future<void> _saveTodoOnServer(String task) async {
     try {
-      // Save locally first
-      await _saveLocalTodos([...todos, task]);
+      await _initStorePath();
 
       Map<String, dynamic> newTodo = {'task': task};
 
@@ -99,8 +116,7 @@ class _TodoListScreenState extends State<TodoListScreen> {
         print('Sending todo to server: $todoJson');
 
         var response = await http.post(
-          Uri.parse(
-              'http://192.168.137.1:3000/addTodo'), // Replace with your server endpoint
+          Uri.parse('http://192.168.137.1:3000/addTodo'),
           headers: {'Content-Type': 'application/json'},
           body: todoJson,
         );
@@ -109,25 +125,51 @@ class _TodoListScreenState extends State<TodoListScreen> {
         print('Server response body: ${response.body}');
 
         if (response.statusCode == 200) {
-          // If the server returns a 200 OK response, fetch the updated todos
           await _syncWithServer();
+          _showSnackbar('Todo added successfully!');
         } else {
           print(
               'Failed to add todo on the server. Server returned ${response.statusCode}');
+          _showSnackbar('Failed to add todo on the server.');
+
+          // Save locally only if the server request fails
+          await _saveLocalTodos([...todos, task]);
         }
       } else {
         print('No internet connection. Saving todo locally.');
+        await _saveLocalTodos([...todos, task]);
+        _showSnackbar('No internet connection. Saving todo locally.');
       }
     } catch (error) {
       print('Error sending todo to the server: $error');
+      await _saveLocalTodos([...todos, task]);
+      _showSnackbar('Error sending todo to the server. Saving locally.');
     }
   }
 
   Future<void> _syncWithServer() async {
     try {
+      await _initStorePath();
+
+      // Fetch local todos
+      final DatabaseFactory dbFactory =
+          kIsWeb ? databaseFactoryWeb : databaseFactoryIo;
+      final Database db = await dbFactory.openDatabase(storePath);
+
+      final localStore = stringMapStoreFactory.store('todos');
+      final localRecord = await localStore.record('todos').get(db);
+
+      List<String> localTodos = [];
+      if (localRecord != null) {
+        final Map<String, dynamic> localData = localRecord;
+        if (localData.containsKey('todos')) {
+          localTodos = List<String>.from(localData['todos']);
+        }
+      }
+
+      // Fetch server todos
       var response = await http.get(
-        Uri.parse(
-            'http://192.168.137.1:3000/todos'), // Replace with your server endpoint
+        Uri.parse('http://192.168.137.1:3000/todos'),
       );
 
       print('Response status code: ${response.statusCode}');
@@ -137,22 +179,68 @@ class _TodoListScreenState extends State<TodoListScreen> {
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = jsonDecode(response.body);
 
+        final List<String> serverTodos = List<String>.from(data['todos']);
+
+        // Combine local and server todos, remove duplicates
+        final List<String> combinedTodos = [
+          ...Set.from([...localTodos, ...serverTodos])
+        ];
+
+        // Update the server with the combined todos
+        await _updateServer(combinedTodos);
+
         setState(() {
-          todos = List<String>.from(data['todos']);
+          todos = combinedTodos;
         });
 
-        await _saveLocalTodos(todos);
+        await _saveLocalTodos(combinedTodos);
+        _showSnackbar('Synced with server successfully!');
       } else {
         print(
             'Failed to fetch todos from the server. Server returned ${response.statusCode}');
+        _showSnackbar('Failed to sync with server.');
       }
     } catch (error) {
       print('Error syncing with server: $error');
+      _showSnackbar('Error syncing with server.');
+    }
+  }
+
+  Future<void> _updateServer(List<String> todosToUpdate) async {
+    try {
+      await _initStorePath();
+
+      final List<Map<String, dynamic>> todosMapList =
+          todosToUpdate.map((todo) => {'task': todo}).toList();
+
+      final String todosJson = jsonEncode({'todos': todosMapList});
+
+      print('Updating server with todos: $todosJson');
+
+      var response = await http.post(
+        Uri.parse('http://192.168.137.1:3000/updateTodos'),
+        headers: {'Content-Type': 'application/json'},
+        body: todosJson,
+      );
+
+      print('Server update response status code: ${response.statusCode}');
+      print('Server update response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        // Server update successful
+      } else {
+        print(
+            'Failed to update todos on the server. Server returned ${response.statusCode}');
+      }
+    } catch (error) {
+      print('Error updating server with todos: $error');
     }
   }
 
   Future<void> _processOfflineTodos() async {
     try {
+      await _initStorePath();
+
       final DatabaseFactory dbFactory =
           kIsWeb ? databaseFactoryWeb : databaseFactoryIo;
       final Database db = await dbFactory.openDatabase(storePath);
@@ -165,7 +253,6 @@ class _TodoListScreenState extends State<TodoListScreen> {
         await _saveTodoOnServer(task);
       }
 
-      // After processing, delete only the processed records
       for (var todoRecord in todosToProcess) {
         await store.record(todoRecord.key).delete(db);
       }
@@ -176,11 +263,23 @@ class _TodoListScreenState extends State<TodoListScreen> {
 
   Future<bool> _checkInternetConnection() async {
     try {
+      if (kIsWeb || !Platform.isAndroid && !Platform.isIOS) {
+        return true;
+      }
+
       final result = await InternetAddress.lookup('google.com');
       return result.isNotEmpty && result[0].rawAddress.isNotEmpty;
     } on SocketException catch (_) {
       return false;
     }
+  }
+
+  void _showSnackbar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+      ),
+    );
   }
 
   @override
@@ -225,8 +324,6 @@ class _TodoListScreenState extends State<TodoListScreen> {
   }
 
   void _addTodo() {
-    TextEditingController _textController = TextEditingController();
-
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -249,6 +346,7 @@ class _TodoListScreenState extends State<TodoListScreen> {
               onPressed: () {
                 Navigator.of(context).pop();
                 _saveTodoOnServer(_textController.text);
+                _textController.clear();
               },
               child: Text('Save Locally'),
             ),

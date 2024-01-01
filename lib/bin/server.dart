@@ -41,11 +41,38 @@ Future<shelf.Response> addTodo(shelf.Request request) async {
   }
 }
 
+Future<shelf.Response> updateTodos(shelf.Request request) async {
+  try {
+    // Read the request body
+    final requestBody = await request.readAsString();
+
+    // Parse the JSON data
+    final Map<String, dynamic> todosData = jsonDecode(requestBody);
+
+    // Get the list of tasks from the parsed data
+    final List<String> updatedTodos = (todosData['todos'] as List<dynamic>)
+        .map<String>((todo) => todo['task'].toString())
+        .toList();
+
+    // Update the todos list
+    todos.clear();
+    todos.addAll(updatedTodos);
+
+    // Respond with success
+    return shelf.Response.ok('Todos updated');
+  } catch (error) {
+    // Handle errors
+    print('Error updating todos: $error');
+    return shelf.Response.internalServerError(body: 'Error updating todos');
+  }
+}
+
 void main() {
   final app = Router();
 
   app.get('/todos', getAllTodos);
   app.post('/addTodo', addTodo);
+  app.post('/updateTodos', updateTodos); // New route for updating todos
 
   var handler = const shelf.Pipeline()
       .addMiddleware(corsHeaders(
