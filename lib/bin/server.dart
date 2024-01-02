@@ -5,7 +5,28 @@ import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:shelf_cors_headers/shelf_cors_headers.dart';
 import 'package:shelf_router/shelf_router.dart';
 
-final List<String> todos = [];
+final List<Map<String, dynamic>> todos = [];
+
+class Todo {
+  final String task;
+
+  Todo(this.task);
+
+  Map<String, dynamic> toMap() {
+    return {'task': task};
+  }
+
+  factory Todo.fromMap(Map<String, dynamic> map) {
+    return Todo(
+      map['task'] as String,
+    );
+  }
+}
+
+final _todosRouter = Router()
+  ..get('/', getAllTodos)
+  ..post('/add', addTodo)
+  ..post('/update', updateTodos);
 
 shelf.Response getAllTodos(shelf.Request request) {
   try {
@@ -20,22 +41,12 @@ shelf.Response getAllTodos(shelf.Request request) {
 
 Future<shelf.Response> addTodo(shelf.Request request) async {
   try {
-    // Read the request body
     final requestBody = await request.readAsString();
-
-    // Parse the JSON data
     final Map<String, dynamic> todoData = jsonDecode(requestBody);
-
-    // Get the task from the parsed data
-    final String task = todoData['task'];
-
-    // Add the task to the todos list
-    todos.add(task);
-
-    // Respond with success
+    final Todo todo = Todo.fromMap(todoData);
+    todos.add(todo.toMap());
     return shelf.Response.ok('Todo added');
   } catch (error) {
-    // Handle errors
     print('Error adding todo: $error');
     return shelf.Response.internalServerError(body: 'Error adding todo');
   }
@@ -43,36 +54,23 @@ Future<shelf.Response> addTodo(shelf.Request request) async {
 
 Future<shelf.Response> updateTodos(shelf.Request request) async {
   try {
-    // Read the request body
     final requestBody = await request.readAsString();
-
-    // Parse the JSON data
     final Map<String, dynamic> todosData = jsonDecode(requestBody);
-
-    // Get the list of tasks from the parsed data
-    final List<String> updatedTodos = (todosData['todos'] as List<dynamic>)
-        .map<String>((todo) => todo['task'].toString())
-        .toList();
-
-    // Update the todos list
+    final List<Map<String, dynamic>> updatedTodos =
+        (todosData['todos'] as List<dynamic>)
+            .map<Map<String, dynamic>>((todo) => Todo.fromMap(todo).toMap())
+            .toList();
     todos.clear();
     todos.addAll(updatedTodos);
-
-    // Respond with success
     return shelf.Response.ok('Todos updated');
   } catch (error) {
-    // Handle errors
     print('Error updating todos: $error');
     return shelf.Response.internalServerError(body: 'Error updating todos');
   }
 }
 
 void main() {
-  final app = Router();
-
-  app.get('/todos', getAllTodos);
-  app.post('/addTodo', addTodo);
-  app.post('/updateTodos', updateTodos); // New route for updating todos
+  final app = Router()..mount('/todos/', _todosRouter);
 
   var handler = const shelf.Pipeline()
       .addMiddleware(corsHeaders(
@@ -85,7 +83,7 @@ void main() {
       .addMiddleware(shelf.logRequests())
       .addHandler(app);
 
-  shelf_io.serve(handler, '192.168.137.1', 3000).then((server) {
-    print('Server started on port 3000');
+  shelf_io.serve(handler, '192.168.137.1', 8080).then((server) {
+    print('Server started on port 8080');
   });
 }
