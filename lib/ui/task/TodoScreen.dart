@@ -12,14 +12,28 @@ class TodoListScreen extends StatefulWidget {
 }
 
 class _TodoListScreenState extends State<TodoListScreen> {
+  @override
+  void initState() {
+    super.initState();
+    _fetchTodos();
+  }
+
+  Future<void> _fetchTodos() async {
+    final todoViewModel = Provider.of<TodoViewModel>(context, listen: false);
+
+    try {
+      await todoViewModel
+          .syncWithServer(); // Use your appropriate method to fetch todos
+    } catch (error) {
+      print('Error fetching todos: $error');
+    }
+  }
+
   TextEditingController _textController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Todo List'),
-      ),
       body: Column(
         children: [
           Expanded(
@@ -29,7 +43,6 @@ class _TodoListScreenState extends State<TodoListScreen> {
                   itemCount: viewModel.todos.length,
                   itemBuilder: (context, index) {
                     final todo = viewModel.todos[index];
-
                     return Card(
                       elevation: 2,
                       child: ExpansionTile(
@@ -65,6 +78,9 @@ class _TodoListScreenState extends State<TodoListScreen> {
                                         : todo.status == 'expired'
                                             ? Colors.red
                                             : Colors.black,
+                                    decoration: todo.status == 'completed'
+                                        ? TextDecoration.lineThrough
+                                        : TextDecoration.none,
                                   ),
                                 ),
                               ),
@@ -73,37 +89,69 @@ class _TodoListScreenState extends State<TodoListScreen> {
                         ),
                         children: [
                           Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
-                              for (var subtask in todo.subtasks)
+                              for (var subtaskIndex = 0;
+                                  subtaskIndex < todo.subtasks.length;
+                                  subtaskIndex++)
                                 Container(
-                                  padding: EdgeInsets.only(top: 2),
+                                  padding: const EdgeInsets.only(
+                                      left: 8, right: 8, top: 2, bottom: 2),
                                   child: Row(
                                     children: [
+                                      Text(
+                                        (subtaskIndex + 1).toString(),
+                                        textAlign: TextAlign.center,
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16),
+                                      ),
                                       SizedBox(
                                         height: 25,
                                         width: 25,
                                         child: Checkbox(
-                                          value: subtask.completed,
+                                          value: todo
+                                              .subtasks[subtaskIndex].completed,
                                           onChanged: (value) {
-                                            subtask.completed = value ?? false;
-                                            viewModel.updateSubtaskStatus(
-                                                todo, subtask);
+                                            todo.subtasks[subtaskIndex]
+                                                .completed = value ?? false;
+                                            viewModel.updateSubtaskStatus(todo,
+                                                todo.subtasks[subtaskIndex]);
                                           },
                                         ),
                                       ),
-                                      Text(
-                                        '${subtask.task}: ${subtask.completed}',
-                                        style: TextStyle(
-                                            color: subtask.completed == true
-                                                ? Colors.green
-                                                : Colors.grey),
+                                      Container(
+                                        padding: const EdgeInsets.only(
+                                            top: 2,
+                                            bottom: 2,
+                                            right: 8,
+                                            left: 8),
+                                        child: Text.rich(
+                                          TextSpan(
+                                            text: todo
+                                                .subtasks[subtaskIndex].task,
+                                            style: TextStyle(
+                                              color: todo.subtasks[subtaskIndex]
+                                                          .completed ==
+                                                      true
+                                                  ? Colors.green
+                                                  : Colors.grey,
+                                              decoration:
+                                                  todo.subtasks[subtaskIndex]
+                                                              .completed ==
+                                                          true
+                                                      ? TextDecoration
+                                                          .lineThrough
+                                                      : TextDecoration.none,
+                                            ),
+                                          ),
+                                        ),
                                       ),
                                     ],
                                   ),
                                 ),
                               Container(
-                                padding: EdgeInsets.only(left: 8, top: 4),
+                                padding: EdgeInsets.all(8),
                                 child: Row(
                                   crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [

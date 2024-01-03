@@ -1,4 +1,4 @@
-import '../db/Database.dart';
+import '../../db/Database.dart';
 import 'model/Todo.dart';
 
 class Repository {
@@ -26,6 +26,34 @@ class Repository {
       await _databaseProvider.updateTodoInDatabase(processedTodo);
     } catch (error) {
       print('Error updating todo in database: $error');
+    }
+  }
+
+  Future<List<Todo>> getTodosByTag(String selectedTag) async {
+    try {
+      return await _databaseProvider.fetchTodosByTag(selectedTag);
+    } catch (error) {
+      print('Error getting todos by tag from database: $error');
+      return [];
+    }
+  }
+
+  Future<List<Todo>> getTodosByDate(DateTime selectedDate) async {
+    try {
+      return await _databaseProvider.fetchTodosByDate(selectedDate);
+    } catch (error) {
+      print('Error getting todos by date from database: $error');
+      return [];
+    }
+  }
+
+  Future<List<Todo>> getTodosByDateRange(
+      DateTime startDate, DateTime endDate) async {
+    try {
+      return await _databaseProvider.fetchTodosByDateRange(startDate, endDate);
+    } catch (error) {
+      print('Error getting todos by date range from database: $error');
+      return [];
     }
   }
 }

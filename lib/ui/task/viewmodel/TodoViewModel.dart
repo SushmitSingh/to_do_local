@@ -72,29 +72,6 @@ class TodoViewModel extends ChangeNotifier {
     }
   }
 
-  Future<void> processOfflineTodos() async {
-    try {
-      // Retrieve the offline todos that need to be processed
-      List<Todo> offlineTodos =
-          _todos.where((todo) => todo.status == 'offline').toList();
-
-      // TODO: Implement logic to process offlineTodos (e.g., send them to the server)
-
-      // Mark processed todos as synced
-      for (var processedTodo in offlineTodos) {
-        processedTodo.synced = true;
-        processedTodo.status = 'completed'; // Update the status as needed
-        await _repository.updateTodo(
-            processedTodo); // Add an updateTodo method in your repository
-      }
-
-      await _fetchTodos(); // Refresh the local list after processing
-    } catch (error) {
-      print('Error processing offline todos: $error');
-      // Handle the error appropriately, e.g., show a snackbar or log it
-    }
-  }
-
   Future<void> updateTodoStatus(Todo todo, String newStatus) async {
     try {
       final updatedTodo = Todo(
@@ -131,6 +108,35 @@ class TodoViewModel extends ChangeNotifier {
       }
     } catch (error) {
       print('Error updating subtask status: $error');
+    }
+  }
+
+  Future<void> fetchTodosByTag(String selectedTag) async {
+    try {
+      _todos = await _repository.getTodosByTag(selectedTag);
+      notifyListeners();
+    } catch (error) {
+      print('Error fetching todos by tag: $error');
+    }
+  }
+
+  Future<void> fetchTodosByDate(DateTime selectedDate) async {
+    try {
+      _todos = await _repository.getTodosByDate(selectedDate);
+      notifyListeners();
+    } catch (error) {
+      print('Error fetching todos by date: $error');
+    }
+  }
+
+  // Example method to get todos within a date range
+  Future<void> fetchTodosByDateRange(
+      DateTime startDate, DateTime endDate) async {
+    try {
+      _todos = await _repository.getTodosByDateRange(startDate, endDate);
+      notifyListeners();
+    } catch (error) {
+      print('Error fetching todos by date range: $error');
     }
   }
 }

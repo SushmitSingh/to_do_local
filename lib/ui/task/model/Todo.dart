@@ -1,3 +1,29 @@
+import 'package:flutter/cupertino.dart';
+
+class TagType {
+  final String tagName;
+  final IconData icon;
+
+  TagType({
+    required this.tagName,
+    required this.icon,
+  });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'tagName': tagName,
+      'icon': icon.codePoint,
+    };
+  }
+
+  factory TagType.fromMap(Map<String, dynamic> map) {
+    return TagType(
+      tagName: map['tagName'] as String,
+      icon: IconData(map['icon'] as int, fontFamily: 'MaterialIcons'),
+    );
+  }
+}
+
 class Subtask {
   final String task;
   bool completed;
@@ -40,7 +66,7 @@ class Todo {
     required this.endDate,
     required this.status,
     required this.tag,
-    this.synced = false, // Default value for synced property
+    this.synced = false,
   });
 
   Map<String, dynamic> toMap() {
