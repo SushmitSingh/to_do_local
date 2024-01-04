@@ -1,78 +1,76 @@
 import 'dart:convert';
 
+import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf.dart' as shelf;
 import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:shelf_cors_headers/shelf_cors_headers.dart';
 import 'package:shelf_router/shelf_router.dart';
 
-final List<Map<String, dynamic>> todos = [];
+final todos = <String>[];
 
-class Todo {
-  final String task;
-
-  Todo(this.task);
-
-  Map<String, dynamic> toMap() {
-    return {'task': task};
-  }
-
-  factory Todo.fromMap(Map<String, dynamic> map) {
-    return Todo(
-      map['task'] as String,
-    );
-  }
+Response getAllTodos(Request request) {
+  final jsonResponse = jsonEncode({'todos': todos});
+  return Response.ok(jsonResponse,
+      headers: {'Content-Type': 'application/json'});
 }
 
-final _todosRouter = Router()
-  ..get('/', getAllTodos)
-  ..post('/add', addTodo)
-  ..post('/update', updateTodos);
-
-shelf.Response getAllTodos(shelf.Request request) {
+Future<Response> addTodo(Request request) async {
   try {
-    final jsonResponse = jsonEncode({'todos': todos});
-    return shelf.Response.ok(jsonResponse,
-        headers: {'Content-Type': 'application/json'});
-  } catch (error) {
-    print('Error getting todos: $error');
-    return shelf.Response.internalServerError(body: 'Error getting todos');
-  }
-}
-
-Future<shelf.Response> addTodo(shelf.Request request) async {
-  try {
+    // Read the request body
     final requestBody = await request.readAsString();
+
+    // Parse the JSON data
     final Map<String, dynamic> todoData = jsonDecode(requestBody);
-    final Todo todo = Todo.fromMap(todoData);
-    todos.add(todo.toMap());
-    return shelf.Response.ok('Todo added');
+
+    // Get the task from the parsed data
+    final String task = todoData['task'];
+
+    // Add the task to the todos list
+    todos.add(task);
+
+    // Respond with success
+    return Response.ok('Todo added');
   } catch (error) {
+    // Handle errors
     print('Error adding todo: $error');
-    return shelf.Response.internalServerError(body: 'Error adding todo');
+    return Response.internalServerError(body: 'Error adding todo');
   }
 }
 
 Future<shelf.Response> updateTodos(shelf.Request request) async {
   try {
+    // Read the request body
     final requestBody = await request.readAsString();
+
+    // Parse the JSON data
     final Map<String, dynamic> todosData = jsonDecode(requestBody);
-    final List<Map<String, dynamic>> updatedTodos =
-        (todosData['todos'] as List<dynamic>)
-            .map<Map<String, dynamic>>((todo) => Todo.fromMap(todo).toMap())
-            .toList();
+
+    // Get the list of tasks from the parsed data
+    final List<String> updatedTodos = (todosData['todos'] as List<dynamic>)
+        .map<String>((todo) => todo['task'].toString())
+        .toList();
+
+    // Update the todos list
     todos.clear();
     todos.addAll(updatedTodos);
+
+    // Respond with success
     return shelf.Response.ok('Todos updated');
   } catch (error) {
+    // Handle errors
     print('Error updating todos: $error');
     return shelf.Response.internalServerError(body: 'Error updating todos');
   }
 }
 
 void main() {
-  final app = Router()..mount('/todos/', _todosRouter);
+  final app = Router();
 
-  var handler = const shelf.Pipeline()
+  app.get('/todos', getAllTodos);
+  app.post('/addTodo', addTodo);
+  app.post('/updateTodos', updateTodos); // New route for updating todos
+
+  var handler = const Pipeline()
       .addMiddleware(corsHeaders(
         headers: {
           'Access-Control-Allow-Origin': '*',
@@ -80,10 +78,10 @@ void main() {
           'Access-Control-Allow-Headers': 'Origin, Content-Type',
         },
       ))
-      .addMiddleware(shelf.logRequests())
+      .addMiddleware(logRequests())
       .addHandler(app);
 
-  shelf_io.serve(handler, '192.168.137.1', 8080).then((server) {
-    print('Server started on port 8080');
+  shelf_io.serve(handler, '192.168.1.7', 3000).then((server) {
+    print('Server started on port 3000');
   });
 }
