@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:to_do_local/ui/auth/LoginScreen.dart';
 import 'package:to_do_local/ui/calendar/CalendarScreen.dart';
-import 'package:to_do_local/ui/onboarding/OnboardingScreen.dart';
 import 'package:to_do_local/ui/profile/ProfileScreen.dart';
 import 'package:to_do_local/ui/task/TodoScreen.dart';
 import 'package:to_do_local/ui/task/viewmodel/TodoViewModel.dart';
@@ -25,19 +25,40 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: OnboardingScreen(), // Show OnboardingScreen initially
+      home: FutureBuilder<bool>(
+        future: checkIfUserLoggedIn(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return CircularProgressIndicator();
+          } else if (snapshot.hasError) {
+            return Text('Error: ${snapshot.error}');
+          } else {
+            bool userLoggedIn = snapshot.data ?? false;
+
+            if (userLoggedIn) {
+              return ScreenWithBottomNav();
+            } else {
+              return LoginScreen();
+            }
+          }
+        },
+      ),
     );
+  }
+
+  Future<bool> checkIfUserLoggedIn() async {
+    // Implement your logic to check if the user is logged in or not
+    // Return true if the user is logged in, false otherwise
+    return false;
   }
 }
 
-class TodoListScreenWithBottomNav extends StatefulWidget {
+class ScreenWithBottomNav extends StatefulWidget {
   @override
-  _TodoListScreenWithBottomNavState createState() =>
-      _TodoListScreenWithBottomNavState();
+  _ScreenWithBottomNavState createState() => _ScreenWithBottomNavState();
 }
 
-class _TodoListScreenWithBottomNavState
-    extends State<TodoListScreenWithBottomNav> {
+class _ScreenWithBottomNavState extends State<ScreenWithBottomNav> {
   int _currentIndex = 0;
   final List<Widget> _screens = [
     TodoListScreen(),

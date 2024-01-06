@@ -1,37 +1,124 @@
 import 'package:flutter/material.dart';
 import 'package:intro_slider/intro_slider.dart';
 
-import '../../main.dart';
+import '../auth/LoginScreen.dart';
 
 class OnboardingScreen extends StatelessWidget {
   final List<Slide> slides = [
     Slide(
-      title: 'Welcome to Your App',
-      description: 'This is your onboarding description.',
-      styleTitle: TextStyle(
-        color: Colors.black,
-        fontSize: 24.0,
-        fontWeight: FontWeight.bold,
+      widgetTitle: RichText(
+        textAlign: TextAlign.center,
+        text: const TextSpan(
+          text: 'Welcome to Your\nTask Manager',
+          style: TextStyle(
+            color: Colors.blue,
+            fontSize: 24.0,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
       ),
-      styleDescription: TextStyle(
-        color: Colors.grey,
+      description:
+          'Your all-in-one solution for managing tasks, calendar events, and your profile effortlessly.',
+      styleDescription: const TextStyle(
+        color: Colors.blueGrey,
         fontSize: 18.0,
       ),
-      pathImage: 'assets/onboarding_image_1.png', // Add your image path
+      pathImage: 'assets/boarding/1onboarding.png',
+      heightImage: 300,
     ),
-    // Add more slides as needed
+    Slide(
+        widgetTitle: RichText(
+          textAlign: TextAlign.center,
+          text: const TextSpan(
+            text: 'Add Tasks \nwith Ease',
+            style: TextStyle(
+              color: Colors.blue,
+              fontSize: 24.0,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        description:
+            'Effortlessly add tasks and events to keep your schedule organized and stress-free.',
+        styleTitle: const TextStyle(
+          color: Colors.blue,
+          fontSize: 24.0,
+          fontWeight: FontWeight.bold,
+        ),
+        styleDescription: const TextStyle(
+          color: Colors.blueGrey,
+          fontSize: 18.0,
+        ),
+        pathImage: 'assets/boarding/2onboarding.png',
+        heightImage: 300 // Replace with your add image path
+        ),
+    Slide(
+        widgetTitle: RichText(
+          textAlign: TextAlign.center,
+          text: const TextSpan(
+            text: 'Stay Organized \nwith the Calendar',
+            style: TextStyle(
+              color: Colors.blue,
+              fontSize: 24.0,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        description:
+            'Utilize our integrated calendar to manage your events, appointments, and deadlines seamlessly.',
+        styleTitle: const TextStyle(
+          color: Colors.blue,
+          fontSize: 24.0,
+          fontWeight: FontWeight.bold,
+        ),
+        styleDescription: const TextStyle(
+          color: Colors.blueGrey,
+          fontSize: 18.0,
+        ),
+        pathImage: 'assets/boarding/3onboarding.png',
+        heightImage: 300),
+    Slide(
+        widgetTitle: RichText(
+          textAlign: TextAlign.center,
+          text: const TextSpan(
+            text: 'Manage Your \nProfile',
+            style: TextStyle(
+              color: Colors.blue,
+              fontSize: 24.0,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        description:
+            'Create and customize your profile to personalize your task management experience.',
+        styleTitle: const TextStyle(
+          color: Colors.blue,
+          fontSize: 24.0,
+          fontWeight: FontWeight.bold,
+        ),
+        styleDescription: const TextStyle(
+          color: Colors.blueGrey,
+          fontSize: 18.0,
+        ),
+        pathImage: 'assets/boarding/4onboarding.png',
+        heightImage: 300 // Replace with your profile image path
+        ),
   ];
 
   @override
   Widget build(BuildContext context) {
     return IntroSlider(
+      key: UniqueKey(),
+      backgroundColorAllSlides: Colors.white,
+      colorActiveDot: Colors.blue,
+      colorDot: Colors.lightBlueAccent,
       slides: slides,
       onDonePress: () {
         // Navigate to TodoListScreenWithBottomNav on Done press
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => TodoListScreenWithBottomNav(),
+            builder: (context) => LoginScreen(),
           ),
         );
       },
@@ -40,10 +127,14 @@ class OnboardingScreen extends StatelessWidget {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => TodoListScreenWithBottomNav(),
+            builder: (context) => LoginScreen(),
           ),
         );
       },
+      scrollPhysics: const BouncingScrollPhysics(),
+      autoScroll: true,
+      loopAutoScroll: true,
+      curveScroll: Curves.bounceIn,
     );
   }
 }
