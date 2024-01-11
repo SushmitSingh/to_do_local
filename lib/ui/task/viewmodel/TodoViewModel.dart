@@ -10,12 +10,26 @@ class TodoViewModel extends ChangeNotifier {
 
   List<Todo> get todos => _todos;
 
+  List<TagType> _tags = [];
+  List<TagType> get tags => _tags;
+
   Future<void> _fetchTodos() async {
     try {
       _todos = await _repository.getTodos();
       notifyListeners();
     } catch (error) {
       print('Error fetching todos: $error');
+    }
+  }
+
+  Future<List<TagType>> fetchTags() async {
+    try {
+      _tags = await _repository.getAllTags();
+      return _tags;
+    } catch (error) {
+      print('Error fetching tags $error');
+      // You might want to throw an exception here or handle the error appropriately.
+      throw error;
     }
   }
 

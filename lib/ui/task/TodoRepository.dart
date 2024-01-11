@@ -38,6 +38,15 @@ class Repository {
     }
   }
 
+  Future<List<TagType>> getAllTags() async {
+    try {
+      return await _databaseProvider.fetchAllTagTypes();
+    } catch (error) {
+      print('Error getting tags from database: $error');
+      return [];
+    }
+  }
+
   Future<List<Todo>> getTodosByDate(DateTime selectedDate) async {
     try {
       return await _databaseProvider.fetchTodosByDate(selectedDate);

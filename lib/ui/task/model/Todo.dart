@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 
 class TagType {
   final String tagName;
-  final IconData icon;
+  IconData icon;
 
   TagType({
     required this.tagName,
@@ -55,7 +55,7 @@ class Todo {
   final DateTime createDate;
   final DateTime endDate;
   late final String status;
-  final String tag;
+  final TagType tag;
   bool synced; // Added synced property
 
   Todo({
@@ -92,7 +92,7 @@ class Todo {
       createDate: DateTime.parse(map['createDate'] as String),
       endDate: DateTime.parse(map['endDate'] as String),
       status: map['status'] as String,
-      tag: map['tag'] as String,
+      tag: map['tag'] as TagType,
       synced: map['synced'] as bool, // Extract synced property from the map
     );
   }

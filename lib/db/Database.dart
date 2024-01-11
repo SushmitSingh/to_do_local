@@ -7,6 +7,7 @@ import '../ui/task/model/Todo.dart';
 class DatabaseProvider {
   final String _todosStoreName = 'todos';
   final String _subtasksStoreName = 'subtasks';
+  final String _tagsStoreName = 'tags'; // New store for TagType
   final DatabaseFactory _dbFactory = databaseFactoryIo;
   late Database _database;
 
@@ -24,7 +25,6 @@ class DatabaseProvider {
     final finder = Finder(sortOrders: [SortOrder('createDate')]);
     final todosSnapshots = await store.find(_database, finder: finder);
 
-    // Ensure the database is closed after fetching data
     await _database.close();
 
     return todosSnapshots.map((snapshot) {
@@ -39,9 +39,22 @@ class DatabaseProvider {
         createDate: DateTime.parse(snapshot['createDate'] as String),
         endDate: DateTime.parse(snapshot['endDate'] as String),
         status: snapshot['status'] as String,
-        tag: snapshot['tag'] as String,
+        tag: TagType.fromMap(snapshot['tag'] as Map<String, dynamic>),
       );
     }).toList();
+  }
+
+  Future<List<TagType>> fetchAllTagTypes() async {
+    await _initializeDatabase();
+
+    final store = intMapStoreFactory.store(_tagsStoreName);
+    final tagSnapshots = await store.find(_database);
+
+    await _database.close();
+
+    return tagSnapshots
+        .map((snapshot) => TagType.fromMap(snapshot.value))
+        .toList();
   }
 
   Future<List<Todo>> fetchTodosByTag(String selectedTag) async {
@@ -66,7 +79,7 @@ class DatabaseProvider {
         createDate: DateTime.parse(snapshot['createDate'] as String),
         endDate: DateTime.parse(snapshot['endDate'] as String),
         status: snapshot['status'] as String,
-        tag: snapshot['tag'] as String,
+        tag: snapshot['tag'] as TagType,
       );
     }).toList();
   }
@@ -107,7 +120,7 @@ class DatabaseProvider {
         createDate: DateTime.parse(snapshot['createDate'] as String),
         endDate: DateTime.parse(snapshot['endDate'] as String),
         status: snapshot['status'] as String,
-        tag: snapshot['tag'] as String,
+        tag: snapshot['tag'] as TagType,
       );
     }).toList();
   }
@@ -139,7 +152,7 @@ class DatabaseProvider {
         createDate: DateTime.parse(snapshot['createDate'] as String),
         endDate: DateTime.parse(snapshot['endDate'] as String),
         status: snapshot['status'] as String,
-        tag: snapshot['tag'] as String,
+        tag: snapshot['tag'] as TagType,
       );
     }).toList();
   }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:to_do_local/ui/auth/LoginScreen.dart';
 import 'package:to_do_local/ui/calendar/CalendarScreen.dart';
+import 'package:to_do_local/ui/onboarding/OnboardingScreen.dart';
 import 'package:to_do_local/ui/profile/ProfileScreen.dart';
 import 'package:to_do_local/ui/task/TodoScreen.dart';
 import 'package:to_do_local/ui/task/viewmodel/TodoViewModel.dart';
@@ -38,7 +38,7 @@ class MyApp extends StatelessWidget {
             if (userLoggedIn) {
               return ScreenWithBottomNav();
             } else {
-              return LoginScreen();
+              return OnboardingScreen();
             }
           }
         },

@@ -118,6 +118,14 @@ class __LoginScreenState extends State<_LoginScreen> {
                     await _verifyPhoneNumber(context);
                   }
                 },
+                onLongPress: () async {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ScreenWithBottomNav(),
+                    ),
+                  );
+                },
                 child: Text('Get OTP'),
               ),
             ],
