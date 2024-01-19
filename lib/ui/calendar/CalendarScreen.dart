@@ -147,7 +147,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                             ),
                             Flexible(
                               child: Padding(
-                                padding: EdgeInsets.only(left: 8),
+                                padding: const EdgeInsets.only(left: 8),
                                 child: Text(
                                   todo.task,
                                   style: TextStyle(
@@ -233,7 +233,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                   ),
                                 ),
                               Container(
-                                padding: EdgeInsets.all(8),
+                                padding: const EdgeInsets.all(8),
                                 child: Row(
                                   crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [

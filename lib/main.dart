@@ -13,7 +13,7 @@ void main() {
         ChangeNotifierProvider(create: (_) => TodoViewModel()),
         // Add other providers if needed
       ],
-      child: MyApp(),
+      child: const MyApp(),
     ),
   );
 }
@@ -29,14 +29,14 @@ class MyApp extends StatelessWidget {
         future: checkIfUserLoggedIn(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return CircularProgressIndicator();
+            return const CircularProgressIndicator();
           } else if (snapshot.hasError) {
             return Text('Error: ${snapshot.error}');
           } else {
             bool userLoggedIn = snapshot.data ?? false;
 
             if (userLoggedIn) {
-              return ScreenWithBottomNav();
+              return const ScreenWithBottomNav();
             } else {
               return OnboardingScreen();
             }
@@ -54,6 +54,8 @@ class MyApp extends StatelessWidget {
 }
 
 class ScreenWithBottomNav extends StatefulWidget {
+  const ScreenWithBottomNav({super.key});
+
   @override
   _ScreenWithBottomNavState createState() => _ScreenWithBottomNavState();
 }
@@ -61,9 +63,9 @@ class ScreenWithBottomNav extends StatefulWidget {
 class _ScreenWithBottomNavState extends State<ScreenWithBottomNav> {
   int _currentIndex = 0;
   final List<Widget> _screens = [
-    TodoListScreen(),
-    CalendarScreen(), // Assuming you have a CalendarScreen widget
-    ProfileScreen(), // Assuming you have a ProfileScreen widget
+    const TodoListScreen(),
+    const CalendarScreen(), // Assuming you have a CalendarScreen widget
+    const ProfileScreen(), // Assuming you have a ProfileScreen widget
   ];
 
   @override
@@ -116,16 +118,16 @@ class _ScreenWithBottomNavState extends State<ScreenWithBottomNav> {
               ),
             ),
             ListTile(
-              leading: Icon(Icons.settings_applications),
-              title: Text('Settings'),
+              leading: const Icon(Icons.settings_applications),
+              title: const Text('Settings'),
               onTap: () {
                 // Navigate to settings screen or perform some action
                 Navigator.pop(context);
               },
             ),
             ListTile(
-              leading: Icon(Icons.info),
-              title: Text('About'),
+              leading: const Icon(Icons.info),
+              title: const Text('About'),
               onTap: () {
                 // Navigate to about screen or perform some action
                 Navigator.pop(context);

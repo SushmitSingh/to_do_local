@@ -16,10 +16,24 @@ class TagType {
     };
   }
 
-  factory TagType.fromMap(Map<String, dynamic> map) {
+  factory TagType.fromMap(Map<String, dynamic>? map) {
     return TagType(
-      tagName: map['tagName'] as String,
-      icon: IconData(map['icon'] as int, fontFamily: 'MaterialIcons'),
+      tagName: map?['tagName'] as String? ?? '',
+      icon: IconData(map?['icon'] as int? ?? 0, fontFamily: 'MaterialIcons'),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'tagName': tagName,
+      'icon': icon.codePoint,
+    };
+  }
+
+  factory TagType.fromJson(Map<String, dynamic> json) {
+    return TagType(
+      tagName: json['tagName'] as String,
+      icon: IconData(json['icon'] as int, fontFamily: 'MaterialIcons'),
     );
   }
 }

@@ -25,11 +25,12 @@ class TodoViewModel extends ChangeNotifier {
   Future<List<TagType>> fetchTags() async {
     try {
       _tags = await _repository.getAllTags();
+      print(tags.toString() + "hiii");
       return _tags;
     } catch (error) {
       print('Error fetching tags $error');
       // You might want to throw an exception here or handle the error appropriately.
-      throw error;
+      rethrow;
     }
   }
 
@@ -152,5 +153,10 @@ class TodoViewModel extends ChangeNotifier {
     } catch (error) {
       print('Error fetching todos by date range: $error');
     }
+  }
+
+  Future<void> addTagType(TagType tagType) async {
+    await _repository.addTagType(tagType);
+    await fetchTags();
   }
 }

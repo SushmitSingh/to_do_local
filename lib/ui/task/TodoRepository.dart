@@ -47,6 +47,14 @@ class Repository {
     }
   }
 
+  Future<List<TagType>> fetchAllTagTypes() async {
+    return await _databaseProvider.fetchAllTagTypes();
+  }
+
+  Future<void> addTagType(TagType tagType) async {
+    await _databaseProvider.addTagType(tagType);
+  }
+
   Future<List<Todo>> getTodosByDate(DateTime selectedDate) async {
     try {
       return await _databaseProvider.fetchTodosByDate(selectedDate);

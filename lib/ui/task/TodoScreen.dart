@@ -12,10 +12,15 @@ class TodoListScreen extends StatefulWidget {
 }
 
 class _TodoListScreenState extends State<TodoListScreen> {
+  late Future<List<TagType>> tagTypesFuture;
+  TextEditingController _tagTypeController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
     _fetchTodos();
+    _fetchAllTagTypes();
+    tagTypesFuture = _fetchAllTagTypes();
   }
 
   Future<void> _fetchTodos() async {
@@ -28,188 +33,204 @@ class _TodoListScreenState extends State<TodoListScreen> {
     }
   }
 
-  TextEditingController _textController = TextEditingController();
-
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        // Handle tap outside the keyboard to dismiss it
-        FocusScope.of(context).requestFocus(FocusNode());
-      },
-      child: Scaffold(
-        resizeToAvoidBottomInset: true,
-        body: Column(
-          children: [
-            Expanded(
-              child: Consumer<TodoViewModel>(
-                builder: (context, viewModel, child) {
-                  return ListView.builder(
-                    itemCount: viewModel.tags.length,
-                    itemBuilder: (context, index) {
-                      final tag = viewModel.tags[index];
-                      return Card(
-                        elevation: 2,
-                        child: Text(tag.tagName),
-                      );
-                    },
-                  );
-                },
-              ),
-            ),
-            Expanded(
-              child: Consumer<TodoViewModel>(
-                builder: (context, viewModel, child) {
-                  return ListView.builder(
-                    itemCount: viewModel.todos.length,
-                    itemBuilder: (context, index) {
-                      final todo = viewModel.todos[index];
-                      return Card(
-                        elevation: 2,
-                        child: ExpansionTile(
-                          initiallyExpanded: false,
-                          title: Row(
-                            children: [
-                              SizedBox(
-                                height: 30,
-                                width: 30,
-                                child: Checkbox(
-                                  value: todo.status == 'completed',
-                                  onChanged: (value) {
-                                    if (value != null && value) {
-                                      viewModel.completeTodo(todo);
-                                    } else {
-                                      viewModel.updateTodoStatus(
-                                          todo, 'pending');
-                                    }
-                                  },
-                                ),
-                              ),
-                              Flexible(
-                                child: Padding(
-                                  padding: EdgeInsets.only(left: 8),
-                                  child: Text(
-                                    todo.task,
-                                    style: TextStyle(
-                                      letterSpacing: 0.5,
-                                      overflow: TextOverflow.fade,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                      color: todo.status == 'completed'
-                                          ? Colors.green
-                                          : todo.status == 'expired'
-                                              ? Colors.red
-                                              : Colors.black,
-                                      decoration: todo.status == 'completed'
-                                          ? TextDecoration.lineThrough
-                                          : TextDecoration.none,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
+    return Scaffold(
+      body: Column(
+        mainAxisSize: MainAxisSize.max,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Flexible(
+            fit: FlexFit.loose,
+            child: Consumer<TodoViewModel>(
+              builder: (context, viewModel, child) {
+                return ListView.builder(
+                  itemCount: viewModel.todos.length,
+                  itemBuilder: (context, index) {
+                    final todo = viewModel.todos[index];
+                    return Card(
+                      elevation: 2,
+                      child: ExpansionTile(
+                        initiallyExpanded: false,
+                        title: Row(
                           children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                for (var subtaskIndex = 0;
-                                    subtaskIndex < todo.subtasks.length;
-                                    subtaskIndex++)
-                                  Container(
-                                    padding: const EdgeInsets.only(
-                                        left: 8, right: 8, top: 2, bottom: 2),
-                                    child: Row(
-                                      children: [
-                                        Text(
-                                          (subtaskIndex + 1).toString(),
-                                          textAlign: TextAlign.center,
-                                          style: const TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 16),
-                                        ),
-                                        SizedBox(
-                                          height: 25,
-                                          width: 25,
-                                          child: Checkbox(
-                                            value: todo.subtasks[subtaskIndex]
-                                                .completed,
-                                            onChanged: (value) {
-                                              todo.subtasks[subtaskIndex]
-                                                  .completed = value ?? false;
-                                              viewModel.updateSubtaskStatus(
-                                                  todo,
-                                                  todo.subtasks[subtaskIndex]);
-                                            },
-                                          ),
-                                        ),
-                                        Container(
-                                          padding: const EdgeInsets.only(
-                                              top: 2,
-                                              bottom: 2,
-                                              right: 8,
-                                              left: 8),
-                                          child: Text.rich(
-                                            TextSpan(
-                                              text: todo
-                                                  .subtasks[subtaskIndex].task,
-                                              style: TextStyle(
-                                                color:
-                                                    todo.subtasks[subtaskIndex]
-                                                                .completed ==
-                                                            true
-                                                        ? Colors.green
-                                                        : Colors.grey,
-                                                decoration:
-                                                    todo.subtasks[subtaskIndex]
-                                                                .completed ==
-                                                            true
-                                                        ? TextDecoration
-                                                            .lineThrough
-                                                        : TextDecoration.none,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
+                            SizedBox(
+                              height: 30,
+                              width: 30,
+                              child: Checkbox(
+                                value: todo.status == 'completed',
+                                onChanged: (value) {
+                                  if (value != null && value) {
+                                    viewModel.completeTodo(todo);
+                                  } else {
+                                    viewModel.updateTodoStatus(todo, 'pending');
+                                  }
+                                },
+                              ),
+                            ),
+                            Flexible(
+                              child: Padding(
+                                padding: const EdgeInsets.only(left: 8),
+                                child: Text(
+                                  todo.task,
+                                  style: TextStyle(
+                                    letterSpacing: 0.5,
+                                    overflow: TextOverflow.fade,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                    color: todo.status == 'completed'
+                                        ? Colors.green
+                                        : todo.status == 'expired'
+                                            ? Colors.red
+                                            : Colors.black,
+                                    decoration: todo.status == 'completed'
+                                        ? TextDecoration.lineThrough
+                                        : TextDecoration.none,
                                   ),
-                                Container(
-                                  padding: EdgeInsets.all(8),
-                                  child: Row(
-                                    crossAxisAlignment: CrossAxisAlignment.end,
-                                    children: [
-                                      Flexible(
-                                        child: Text(
-                                            'Tag: ${todo.tag} ,Date: ${todo.createDate}-${todo.endDate}'),
-                                      ),
-                                    ],
-                                  ),
-                                )
-                              ],
+                                ),
+                              ),
                             ),
                           ],
                         ),
-                      );
-                    },
-                  );
-                },
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                _showAddTodoBottomSheet(context);
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              for (var subtaskIndex = 0;
+                                  subtaskIndex < todo.subtasks.length;
+                                  subtaskIndex++)
+                                Container(
+                                  padding: const EdgeInsets.only(
+                                      left: 8, right: 8, top: 2, bottom: 2),
+                                  child: Row(
+                                    children: [
+                                      Text(
+                                        (subtaskIndex + 1).toString(),
+                                        textAlign: TextAlign.center,
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16),
+                                      ),
+                                      SizedBox(
+                                        height: 25,
+                                        width: 25,
+                                        child: Checkbox(
+                                          value: todo
+                                              .subtasks[subtaskIndex].completed,
+                                          onChanged: (value) {
+                                            todo.subtasks[subtaskIndex]
+                                                .completed = value ?? false;
+                                            viewModel.updateSubtaskStatus(todo,
+                                                todo.subtasks[subtaskIndex]);
+                                          },
+                                        ),
+                                      ),
+                                      Container(
+                                        padding: const EdgeInsets.only(
+                                            top: 2,
+                                            bottom: 2,
+                                            right: 8,
+                                            left: 8),
+                                        child: Text.rich(
+                                          TextSpan(
+                                            text: todo
+                                                .subtasks[subtaskIndex].task,
+                                            style: TextStyle(
+                                              color: todo.subtasks[subtaskIndex]
+                                                          .completed ==
+                                                      true
+                                                  ? Colors.green
+                                                  : Colors.grey,
+                                              decoration:
+                                                  todo.subtasks[subtaskIndex]
+                                                              .completed ==
+                                                          true
+                                                      ? TextDecoration
+                                                          .lineThrough
+                                                      : TextDecoration.none,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    Flexible(
+                                      child: Text(
+                                          'Tag: ${todo.tag.tagName} ,Date: ${todo.createDate}-${todo.endDate}'),
+                                    ),
+                                  ],
+                                ),
+                              )
+                            ],
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                );
               },
-              child: Text('Add Todo'),
             ),
-            ElevatedButton(
-              onPressed: () {
-                _syncWithServer(context);
+          ),
+          Flexible(
+            fit: FlexFit.tight,
+            child: Consumer<TodoViewModel>(
+              builder: (context, viewModel, child) {
+                return ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: viewModel.tags.length,
+                  itemBuilder: (context, index) {
+                    final tag = viewModel.tags[index];
+                    return GestureDetector(
+                      onTap: () {
+                        // Handle tag selection
+                        _showSnackbar(
+                            tag.tagName, context); // Replace with your logic
+                      },
+                      child: Card(
+                        elevation: 2,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12, // Add horizontal padding
+                            vertical: 8, // Add vertical padding
+                          ),
+                          child: Wrap(
+                            children: [
+                              Text(
+                                tag.tagName,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                );
               },
-              child: Text('Sync with Server'),
             ),
-          ],
-        ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              _showAddTodoBottomSheet(context);
+            },
+            child: const Text('Add Todo'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              _syncWithServer(context);
+            },
+            child: const Text('Sync with Server'),
+          ),
+        ],
       ),
     );
   }
@@ -222,182 +243,191 @@ class _TodoListScreenState extends State<TodoListScreen> {
     String selectedTag = 'personal'; // Default tag
     List<Subtask> subtasks = [];
 
-    GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-    FocusNode _focusNode = FocusNode();
+    GlobalKey<FormState> formKey = GlobalKey<FormState>();
+    FocusNode focusNode = FocusNode();
 
     showModalBottomSheet(
+      isScrollControlled: true,
       context: context,
       builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return FutureBuilder<List<TagType>>(
-              future: _fetchAllTagTypes(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const CircularProgressIndicator();
-                } else if (snapshot.hasError) {
-                  return const Text('Error loading tag types');
-                } else {
-                  List<String> tagTypeNames = snapshot.data
-                          ?.map((tagType) => tagType.tagName)
-                          .toList() ??
-                      [];
+        return Container(
+          margin: EdgeInsets.only(
+              bottom:
+                  MediaQuery.of(context).viewInsets.bottom), // Keyboard margin
+          padding: const EdgeInsets.all(20),
+          child: StatefulBuilder(
+            builder: (context, setState) {
+              return FutureBuilder<List<TagType>>(
+                future: _fetchAllTagTypes(),
+                builder: (context, snapshot) {
+                  /*if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const CircularProgressIndicator();
+                  } else */
+                  if (snapshot.hasError) {
+                    return const Text('Error loading tag types');
+                  } else {
+                    List<String> tagTypeNames = snapshot.data
+                            ?.map((tagType) => tagType.tagName)
+                            .toList() ??
+                        [];
 
-                  return Form(
-                    key: _formKey,
-                    child: SingleChildScrollView(
-                      child: Container(
-                        padding: EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text('Add Todo'),
-                            TextFormField(
-                              key: ValueKey('unique_key_for_textfield'),
-                              focusNode: _focusNode,
-                              onChanged: (value) {
-                                setState(() {
-                                  task = value;
-                                });
-                              },
-                              decoration:
-                                  const InputDecoration(labelText: 'Task'),
-                            ),
-                            const SizedBox(height: 8),
-                            Text('Create Date: ${createDate.toLocal()}'),
-                            ElevatedButton(
-                              onPressed: () async {
-                                final selectedDate = await showDatePicker(
-                                  context: context,
-                                  initialDate: createDate,
-                                  firstDate: DateTime(2000),
-                                  lastDate: DateTime(2101),
-                                );
-
-                                if (selectedDate != null &&
-                                    selectedDate != createDate) {
-                                  setState(() {
-                                    createDate = selectedDate;
-                                  });
-                                }
-                              },
-                              child: const Text('Select Create Date'),
-                            ),
-                            const SizedBox(height: 8),
-                            Text('End Date: ${endDate.toLocal()}'),
-                            ElevatedButton(
-                              onPressed: () async {
-                                final selectedDate = await showDatePicker(
-                                  context: context,
-                                  initialDate: endDate,
-                                  firstDate: DateTime(2000),
-                                  lastDate: DateTime(2101),
-                                );
-
-                                if (selectedDate != null &&
-                                    selectedDate != endDate) {
-                                  setState(() {
-                                    endDate = selectedDate;
-                                  });
-                                }
-                              },
-                              child: const Text('Select End Date'),
-                            ),
-                            SizedBox(height: 8),
-                            Text('Status'),
-                            DropdownButton<String>(
-                              value: status,
-                              onChanged: (value) {
-                                setState(() {
-                                  status = value!;
-                                });
-                              },
-                              items: ['pending', 'completed'].map((status) {
-                                return DropdownMenuItem<String>(
-                                  value: status,
-                                  child: Text(status),
-                                );
-                              }).toList(),
-                            ),
-                            SizedBox(height: 8),
-                            Text('Tag'),
-                            DropdownButton<String>(
-                              value: selectedTag,
-                              onChanged: (value) {
-                                setState(() {
-                                  selectedTag = value!;
-                                });
-
-                                // If 'Create New Tag' is selected, clear the text field
-                                if (selectedTag == 'createNewTag') {
-                                  setState(() {
-                                    selectedTag = '';
-                                  });
-                                }
-                              },
-                              items: [
-                                ...tagTypeNames.map((tagName) {
-                                  return DropdownMenuItem<String>(
-                                    value: tagName,
-                                    child: Text(tagName),
-                                  );
-                                }),
-                                if (!tagTypeNames.contains(selectedTag))
-                                  DropdownMenuItem<String>(
-                                    value: selectedTag,
-                                    child: Text(selectedTag),
-                                  ),
-                                DropdownMenuItem<String>(
-                                  value: 'createNewTag',
-                                  child: const Text('Create New Tag'),
+                    return Form(
+                      key: formKey,
+                      child: SingleChildScrollView(
+                        child: Container(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            children: [
+                              const Text(
+                                'Add Todo',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
                                 ),
-                              ],
-                            ),
-                            // If 'Create New Tag' is selected, show a text field to input a new tag name
-                            if (selectedTag == 'createNewTag')
-                              TextField(
+                              ),
+                              TextFormField(
+                                key: const ValueKey('unique_key_for_textfield'),
+                                focusNode: focusNode,
                                 onChanged: (value) {
                                   setState(() {
-                                    selectedTag = value;
+                                    task = value;
                                   });
                                 },
                                 decoration:
-                                    InputDecoration(labelText: 'New Tag'),
+                                    const InputDecoration(labelText: 'Task'),
                               ),
-                            SizedBox(height: 8),
-                            ElevatedButton(
-                              onPressed: () {
-                                _showAddSubtaskDialog(
-                                    context, subtasks, setState);
-                              },
-                              child: const Text('Add Subtask'),
-                            ),
-                            SizedBox(height: 16),
-                            ElevatedButton(
-                              onPressed: () {
-                                _saveTodoLocal(
-                                  context,
-                                  task,
-                                  createDate,
-                                  endDate,
-                                  status,
-                                  selectedTag,
-                                  subtasks,
-                                );
+                              const SizedBox(height: 8),
+                              Text('Create Date: ${createDate.toLocal()}'),
+                              ElevatedButton(
+                                onPressed: () async {
+                                  final selectedDate = await showDatePicker(
+                                    context: context,
+                                    initialDate: createDate,
+                                    firstDate: DateTime(2000),
+                                    lastDate: DateTime(2101),
+                                  );
 
-                                Navigator.of(context).pop();
-                              },
-                              child: const Text('Save Locally'),
-                            ),
-                          ],
+                                  if (selectedDate != null &&
+                                      selectedDate != createDate) {
+                                    setState(() {
+                                      createDate = selectedDate;
+                                    });
+                                  }
+                                },
+                                child: const Text('Select Create Date'),
+                              ),
+                              const SizedBox(height: 8),
+                              Text('End Date: ${endDate.toLocal()}'),
+                              ElevatedButton(
+                                onPressed: () async {
+                                  final selectedDate = await showDatePicker(
+                                    context: context,
+                                    initialDate: endDate,
+                                    firstDate: DateTime(2000),
+                                    lastDate: DateTime(2101),
+                                  );
+
+                                  if (selectedDate != null &&
+                                      selectedDate != endDate) {
+                                    setState(() {
+                                      endDate = selectedDate;
+                                    });
+                                  }
+                                },
+                                child: const Text('Select End Date'),
+                              ),
+                              const SizedBox(height: 8),
+                              const Text('Status'),
+                              DropdownButton<String>(
+                                value: status,
+                                onChanged: (value) {
+                                  setState(() {
+                                    status = value!;
+                                  });
+                                },
+                                items: [
+                                  'pending',
+                                  'completed',
+                                  'expire',
+                                  'other'
+                                ].map((status) {
+                                  return DropdownMenuItem<String>(
+                                    value: status,
+                                    child: Text(status),
+                                  );
+                                }).toList(),
+                              ),
+                              const SizedBox(height: 8),
+                              const Text('Tag'),
+                              DropdownButton<String>(
+                                value: selectedTag,
+                                onChanged: (value) {
+                                  setState(() {
+                                    selectedTag = value!;
+                                  });
+
+                                  // If 'Create New Tag' is selected, clear the text field
+                                  if (selectedTag == 'createNewTag') {
+                                    setState(() {
+                                      selectedTag = '';
+                                    });
+                                    _showAddTagTypeDialog(context);
+                                  }
+                                },
+                                items: [
+                                  ...tagTypeNames.map((tagName) {
+                                    return DropdownMenuItem<String>(
+                                      value: tagName,
+                                      child: Text(tagName),
+                                    );
+                                  }),
+                                  if (!tagTypeNames.contains(selectedTag))
+                                    DropdownMenuItem<String>(
+                                      value: selectedTag,
+                                      child: Text(selectedTag),
+                                    ),
+                                  const DropdownMenuItem<String>(
+                                    value: 'createNewTag',
+                                    child: Text('Create New Tag'),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              ElevatedButton(
+                                onPressed: () {
+                                  _showAddSubtaskDialog(
+                                      context, subtasks, setState);
+                                },
+                                child: const Text('Add Subtask'),
+                              ),
+                              const SizedBox(height: 16),
+                              ElevatedButton(
+                                onPressed: () {
+                                  _saveTodoLocal(
+                                    context,
+                                    task,
+                                    createDate,
+                                    endDate,
+                                    status,
+                                    selectedTag,
+                                    subtasks,
+                                  );
+
+                                  Navigator.of(context).pop();
+                                },
+                                child: const Text('Save Locally'),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                  );
-                }
-              },
-            );
-          },
+                    );
+                  }
+                },
+              );
+            },
+          ),
         );
       },
     );
@@ -419,19 +449,19 @@ class _TodoListScreenState extends State<TodoListScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Add Subtask'),
+          title: const Text('Add Subtask'),
           content: TextField(
             onChanged: (value) {
               subtaskName = value;
             },
-            decoration: InputDecoration(labelText: 'Subtask'),
+            decoration: const InputDecoration(labelText: 'Subtask'),
           ),
           actions: <Widget>[
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text('Cancel'),
+              child: const Text('Cancel'),
             ),
             TextButton(
               onPressed: () {
@@ -440,7 +470,40 @@ class _TodoListScreenState extends State<TodoListScreen> {
                 });
                 Navigator.of(context).pop();
               },
-              child: Text('Add Subtask'),
+              child: const Text('Add Subtask'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  _showAddTagTypeDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Create New Tag'),
+          content: TextField(
+            controller: _tagTypeController, // Use a TextEditingController
+            decoration: InputDecoration(labelText: 'Tag Name'),
+          ),
+          actions: [
+            ElevatedButton(
+              onPressed: () {
+                final newTagType = TagType(
+                  tagName: _tagTypeController.text,
+                  icon: Icons
+                      .tag, // You can set a default icon or let the user choose
+                );
+
+                // Call the ViewModel to add the new tag type
+                Provider.of<TodoViewModel>(context, listen: false)
+                    .addTagType(newTagType);
+
+                Navigator.pop(context);
+              },
+              child: Text('Create'),
             ),
           ],
         );
@@ -466,8 +529,7 @@ class _TodoListScreenState extends State<TodoListScreen> {
       createDate: createDate,
       endDate: endDate,
       status: status,
-      tag:
-          TagType(tagName: tag, icon: Icons.label), // Example: Creating TagType
+      tag: TagType(tagName: tag, icon: Icons.cabin),
     );
 
     todoViewModel.addTodo(newTodo);
@@ -495,7 +557,7 @@ class _TodoListScreenState extends State<TodoListScreen> {
 
   @override
   void dispose() {
-    _textController.dispose();
+    _tagTypeController.dispose();
     super.dispose();
   }
 }

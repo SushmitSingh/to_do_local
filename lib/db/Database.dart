@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sembast/sembast.dart';
 import 'package:sembast/sembast_io.dart';
@@ -25,21 +26,30 @@ class DatabaseProvider {
     final finder = Finder(sortOrders: [SortOrder('createDate')]);
     final todosSnapshots = await store.find(_database, finder: finder);
 
+    // Ensure the database is closed after fetching data
     await _database.close();
 
     return todosSnapshots.map((snapshot) {
-      final List<dynamic> subtasksData = (snapshot['subtasks'] as List) ?? [];
-      final List<Subtask> subtasks =
-          subtasksData.map((data) => Subtask.fromMap(data)).toList();
+      final List<dynamic>? subtasksData =
+          snapshot['subtasks'] as List<dynamic>?;
+
+      // Ensure subtasksData is not null before using it
+      final List<Subtask> subtasks = (subtasksData ?? []).map((data) {
+        // Handle null values in subtask data
+        return Subtask.fromMap(data as Map<String, dynamic>);
+      }).toList();
 
       return Todo(
-        task: snapshot['task'] as String,
-        key: snapshot['key'] as String,
+        task: snapshot['task'] as String? ?? "",
+        key: snapshot['key'] as String? ?? "",
         subtasks: subtasks,
-        createDate: DateTime.parse(snapshot['createDate'] as String),
-        endDate: DateTime.parse(snapshot['endDate'] as String),
-        status: snapshot['status'] as String,
-        tag: TagType.fromMap(snapshot['tag'] as Map<String, dynamic>),
+        createDate: DateTime.parse(snapshot['createDate'] as String? ?? ""),
+        endDate: DateTime.parse(snapshot['endDate'] as String? ?? ""),
+        status: snapshot['status'] as String? ?? "",
+        tag: TagType.fromMap(snapshot['tag'] as Map<String, dynamic>?) ??
+            TagType(
+                tagName: '',
+                icon: Icons.error), // Provide a default TagType if null
       );
     }).toList();
   }
@@ -52,16 +62,24 @@ class DatabaseProvider {
 
     await _database.close();
 
-    return tagSnapshots
-        .map((snapshot) => TagType.fromMap(snapshot.value))
-        .toList();
+    return tagSnapshots.map((snapshot) {
+      final Map<String, dynamic>? tagData =
+          snapshot['tag'] as Map<String, dynamic>?;
+
+      // Deserialize TagType object
+      final TagType tag = tagData != null
+          ? TagType.fromMap(tagData)
+          : TagType(tagName: '', icon: Icons.error);
+
+      return tag;
+    }).toList();
   }
 
   Future<List<Todo>> fetchTodosByTag(String selectedTag) async {
     await _initializeDatabase();
 
     final store = intMapStoreFactory.store(_todosStoreName);
-    final finder = Finder(filter: Filter.equals('tag', selectedTag));
+    final finder = Finder(filter: Filter.equals('tag.tagName', selectedTag));
     final todosSnapshots = await store.find(_database, finder: finder);
 
     // Ensure the database is closed after fetching data
@@ -72,6 +90,11 @@ class DatabaseProvider {
       final List<Subtask> subtasks =
           subtasksData.map((data) => Subtask.fromMap(data)).toList();
 
+      // Deserialize TagType object
+      final Map<String, dynamic> tagData =
+          snapshot['tag'] as Map<String, dynamic>;
+      final TagType tag = TagType.fromJson(tagData);
+
       return Todo(
         task: snapshot['task'] as String,
         key: snapshot['key'] as String,
@@ -79,7 +102,7 @@ class DatabaseProvider {
         createDate: DateTime.parse(snapshot['createDate'] as String),
         endDate: DateTime.parse(snapshot['endDate'] as String),
         status: snapshot['status'] as String,
-        tag: snapshot['tag'] as TagType,
+        tag: tag,
       );
     }).toList();
   }
@@ -99,7 +122,7 @@ class DatabaseProvider {
           Filter.greaterThanOrEquals(
               'createDate', selectedDateTime.toIso8601String()),
           Filter.lessThanOrEquals('endDate',
-              selectedDateTime.add(Duration(days: 1)).toIso8601String()),
+              selectedDateTime.add(const Duration(days: 1)).toIso8601String()),
         ]),
       ]),
     );
@@ -165,9 +188,9 @@ class DatabaseProvider {
     final snapshot = await store.findFirst(_database, finder: finder);
 
     if (snapshot == null) {
-      await store.add(_database, todo.toMap());
+      await store.add(_database, _todoToMap(todo));
     } else {
-      await store.record(snapshot.key).update(_database, todo.toMap());
+      await store.record(snapshot.key).update(_database, _todoToMap(todo));
     }
 
     // Ensure the database is closed after the operation
@@ -182,8 +205,35 @@ class DatabaseProvider {
     final snapshot = await store.findFirst(_database, finder: finder);
 
     if (snapshot != null) {
-      await store.record(snapshot.key).update(_database, updatedTodo.toMap());
+      await store.record(snapshot.key).update(_database, {
+        ...updatedTodo.toMap(),
+        'tag': updatedTodo.tag.toJson(), // Convert TagType to JSON
+      });
     }
+
+    // Ensure the database is closed after the operation
+    await _database.close();
+  }
+
+  Map<String, dynamic> _todoToMap(Todo todo) {
+    return {
+      'task': todo.task,
+      'key': todo.key,
+      'subtasks': todo.subtasks.map((subtask) => subtask.toMap()).toList(),
+      'createDate': todo.createDate.toIso8601String(),
+      'endDate': todo.endDate.toIso8601String(),
+      'status': todo.status,
+      'tag':
+          todo.tag.toJson(), // Convert TagType to a format suitable for storage
+      'synced': todo.synced,
+    };
+  }
+
+  Future<void> addTagType(TagType tagType) async {
+    await _initializeDatabase();
+
+    final store = intMapStoreFactory.store(_tagsStoreName);
+    await store.add(_database, {'tag': tagType.toMap()});
 
     // Ensure the database is closed after the operation
     await _database.close();

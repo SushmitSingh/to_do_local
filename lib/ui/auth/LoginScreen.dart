@@ -36,7 +36,7 @@ class __LoginScreenState extends State<_LoginScreen> {
     return Scaffold(
       body: SafeArea(
         child: Padding(
-          padding: EdgeInsets.all(16),
+          padding: const EdgeInsets.all(16),
           child: Column(
             children: [
               const SizedBox(
@@ -63,7 +63,7 @@ class __LoginScreenState extends State<_LoginScreen> {
                     fontSize: 16.0,
                   ),
                   textAlign: TextAlign.start),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               InternationalPhoneNumberInput(
                 onInputChanged: (PhoneNumber number) {
                   // Handle changes in phone number input
@@ -78,10 +78,10 @@ class __LoginScreenState extends State<_LoginScreen> {
                 ),
                 ignoreBlank: false,
                 autoValidateMode: AutovalidateMode.disabled,
-                selectorTextStyle: TextStyle(color: Colors.black),
+                selectorTextStyle: const TextStyle(color: Colors.black),
                 textFieldController: _phoneNumberController,
                 formatInput: false,
-                keyboardType: TextInputType.numberWithOptions(
+                keyboardType: const TextInputType.numberWithOptions(
                   signed: true,
                   decimal: true,
                 ),
@@ -92,9 +92,9 @@ class __LoginScreenState extends State<_LoginScreen> {
                   // Save the phone number
                 },
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               Container(
-                padding: EdgeInsets.all(10),
+                padding: const EdgeInsets.all(10),
                 child: PinCodeTextField(
                   controller: _otpController,
                   keyboardType: TextInputType.number,
@@ -109,7 +109,7 @@ class __LoginScreenState extends State<_LoginScreen> {
                   length: 6,
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () async {
                   // Validate the form
@@ -122,11 +122,11 @@ class __LoginScreenState extends State<_LoginScreen> {
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => ScreenWithBottomNav(),
+                      builder: (context) => const ScreenWithBottomNav(),
                     ),
                   );
                 },
-                child: Text('Get OTP'),
+                child: const Text('Get OTP'),
               ),
             ],
           ),
@@ -149,25 +149,23 @@ class __LoginScreenState extends State<_LoginScreen> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => ScreenWithBottomNav(),
+            builder: (context) => const ScreenWithBottomNav(),
           ),
         );
       }
 
-      PhoneVerificationFailed verificationFailed =
-          (FirebaseAuthException authException) {
+      verificationFailed(FirebaseAuthException authException) {
         // Handle verification failed
         print('Verification Failed: ${authException.message}');
-      };
+      }
 
-      PhoneCodeSent codeSent = (String verificationId, int? resendToken) async {
+      codeSent(String verificationId, int? resendToken) async {
         _verificationId = verificationId;
-      };
+      }
 
-      PhoneCodeAutoRetrievalTimeout codeAutoRetrievalTimeout =
-          (String verificationId) {
+      codeAutoRetrievalTimeout(String verificationId) {
         _verificationId = verificationId;
-      };
+      }
 
       await FirebaseAuth.instance.verifyPhoneNumber(
         phoneNumber: '$_countryCode${_phoneNumberController.text}',
@@ -175,7 +173,7 @@ class __LoginScreenState extends State<_LoginScreen> {
         verificationFailed: verificationFailed,
         codeSent: codeSent,
         codeAutoRetrievalTimeout: codeAutoRetrievalTimeout,
-        timeout: Duration(seconds: 60),
+        timeout: const Duration(seconds: 60),
       );
     } catch (e) {
       // Handle exceptions
