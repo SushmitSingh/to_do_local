@@ -30,7 +30,7 @@ class OnboardingScreen extends StatelessWidget {
         widgetTitle: RichText(
           textAlign: TextAlign.center,
           text: const TextSpan(
-            text: 'Add Tasks \nwith Ease',
+            text: 'Add Tasks With Ease',
             style: TextStyle(
               color: Colors.blue,
               fontSize: 24.0,
@@ -56,7 +56,7 @@ class OnboardingScreen extends StatelessWidget {
         widgetTitle: RichText(
           textAlign: TextAlign.center,
           text: const TextSpan(
-            text: 'Stay Organized \nwith the Calendar',
+            text: 'Stay Organized \nWith The Calendar',
             style: TextStyle(
               color: Colors.blue,
               fontSize: 24.0,
@@ -81,7 +81,7 @@ class OnboardingScreen extends StatelessWidget {
         widgetTitle: RichText(
           textAlign: TextAlign.center,
           text: const TextSpan(
-            text: 'Manage Your \nProfile',
+            text: 'Manage Your Profile',
             style: TextStyle(
               color: Colors.blue,
               fontSize: 24.0,
@@ -112,10 +112,22 @@ class OnboardingScreen extends StatelessWidget {
       backgroundColorAllSlides: Colors.white,
       colorActiveDot: Colors.blue,
       colorDot: Colors.lightBlueAccent,
+      skipButtonStyle: ButtonStyle(
+        backgroundColor: MaterialStateProperty.resolveWith((states) {
+          // If the button is pressed, return green, otherwise blue
+          if (states.contains(MaterialState.pressed)) {
+            return Colors.green;
+          }
+          return Colors.blue;
+        }),
+        textStyle: MaterialStateProperty.resolveWith((states) {
+          return const TextStyle(color: Colors.white);
+        }),
+      ),
       slides: slides,
       onDonePress: () {
         // Navigate to TodoListScreenWithBottomNav on Done press
-        Navigator.pushReplacement(
+        Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => const LoginScreen(),
@@ -124,7 +136,7 @@ class OnboardingScreen extends StatelessWidget {
       },
       onSkipPress: () {
         // Navigate to TodoListScreenWithBottomNav on Skip press
-        Navigator.pushReplacement(
+        Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => const LoginScreen(),

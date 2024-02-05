@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:to_do_local/ui/PrivacyPolicyScreen.dart';
+import 'package:to_do_local/ui/TermsAndConditionsScreen.dart';
 import 'package:to_do_local/ui/calendar/CalendarScreen.dart';
 import 'package:to_do_local/ui/onboarding/OnboardingScreen.dart';
 import 'package:to_do_local/ui/profile/ProfileScreen.dart';
@@ -49,7 +51,7 @@ class MyApp extends StatelessWidget {
   Future<bool> checkIfUserLoggedIn() async {
     // Implement your logic to check if the user is logged in or not
     // Return true if the user is logged in, false otherwise
-    return false;
+    return true;
   }
 }
 
@@ -64,20 +66,50 @@ class _ScreenWithBottomNavState extends State<ScreenWithBottomNav> {
   int _currentIndex = 0;
   final List<Widget> _screens = [
     const TodoListScreen(),
-    const CalendarScreen(), // Assuming you have a CalendarScreen widget
-    const ProfileScreen(), // Assuming you have a ProfileScreen widget
+    const CalendarScreen(),
+    const ProfileScreen(),
   ];
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _currentIndex = index;
+    });
+    Navigator.pop(context); // Close the drawer when a screen is selected
+  }
+
+  void _onPrivacyPolicyTapped() {
+    Navigator.pop(context); // Close the drawer before navigating
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const PrivacyPolicyScreen()),
+    );
+  }
+
+  void _onTermsAndConditionsTapped() {
+    Navigator.pop(context); // Close the drawer before navigating
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const TermsAndConditionsScreen()),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(_currentIndex == 0
-            ? 'Todo'
-            : _currentIndex == 1
-                ? 'Calendar'
-                : 'Profile'),
-      ),
+      appBar: _currentIndex == 0
+          ? AppBar(
+              title: const Text('Todo'),
+            )
+          : _currentIndex == 1
+              ? AppBar(
+                  title: const Text('Calendar'),
+                )
+              : _currentIndex == 2
+                  ? AppBar(
+                      title: const Text('Profile'),
+                    )
+                  : null,
+      // AppBar is null for Privacy Policy and Terms and Conditions screens
       body: _screens[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
@@ -118,20 +150,33 @@ class _ScreenWithBottomNavState extends State<ScreenWithBottomNav> {
               ),
             ),
             ListTile(
-              leading: const Icon(Icons.settings_applications),
-              title: const Text('Settings'),
-              onTap: () {
-                // Navigate to settings screen or perform some action
-                Navigator.pop(context);
-              },
+              leading: const Icon(Icons.check),
+              title: const Text('Todo'),
+              onTap: () => _onItemTapped(0),
+              selected: _currentIndex == 0,
             ),
             ListTile(
-              leading: const Icon(Icons.info),
-              title: const Text('About'),
-              onTap: () {
-                // Navigate to about screen or perform some action
-                Navigator.pop(context);
-              },
+              leading: const Icon(Icons.calendar_today),
+              title: const Text('Calendar'),
+              onTap: () => _onItemTapped(1),
+              selected: _currentIndex == 1,
+            ),
+            ListTile(
+              leading: const Icon(Icons.person),
+              title: const Text('Profile'),
+              onTap: () => _onItemTapped(2),
+              selected: _currentIndex == 2,
+            ),
+            const Divider(), // Add a divider for visual separation
+            ListTile(
+              leading: const Icon(Icons.description),
+              title: const Text('Privacy Policy'),
+              onTap: _onPrivacyPolicyTapped,
+            ),
+            ListTile(
+              leading: const Icon(Icons.library_books),
+              title: const Text('Terms and Conditions'),
+              onTap: _onTermsAndConditionsTapped,
             ),
           ],
         ),

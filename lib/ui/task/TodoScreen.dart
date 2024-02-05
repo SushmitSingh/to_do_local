@@ -37,11 +37,38 @@ class _TodoListScreenState extends State<TodoListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Column(
-        mainAxisSize: MainAxisSize.max,
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          Flexible(
-            fit: FlexFit.loose,
+          Padding(
+            padding: const EdgeInsets.all(5),
+            child: SizedBox(
+              height: 50,
+              child: Consumer<TodoViewModel>(
+                builder: (context, viewModel, child) {
+                  return ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: viewModel.tags.length,
+                    itemBuilder: (context, index) {
+                      final tag = viewModel.tags[index];
+                      return Card(
+                        elevation: 2,
+                        child: Row(children: [
+                          Text(
+                            tag.tagName,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontSize: 14,
+                            ),
+                          ),
+                        ]),
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+          ),
+          Expanded(
             child: Consumer<TodoViewModel>(
               builder: (context, viewModel, child) {
                 return ListView.builder(
@@ -177,58 +204,23 @@ class _TodoListScreenState extends State<TodoListScreen> {
               },
             ),
           ),
-          Flexible(
-            fit: FlexFit.tight,
-            child: Consumer<TodoViewModel>(
-              builder: (context, viewModel, child) {
-                return ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: viewModel.tags.length,
-                  itemBuilder: (context, index) {
-                    final tag = viewModel.tags[index];
-                    return GestureDetector(
-                      onTap: () {
-                        // Handle tag selection
-                        _showSnackbar(
-                            tag.tagName, context); // Replace with your logic
-                      },
-                      child: Card(
-                        elevation: 2,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12, // Add horizontal padding
-                            vertical: 8, // Add vertical padding
-                          ),
-                          child: Wrap(
-                            children: [
-                              Text(
-                                tag.tagName,
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                ),
-                              )
-                            ],
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                );
-              },
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              _showAddTodoBottomSheet(context);
-            },
-            child: const Text('Add Todo'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              _syncWithServer(context);
-            },
-            child: const Text('Sync with Server'),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              ElevatedButton(
+                onPressed: () {
+                  _syncWithServer(context);
+                },
+                child: const Text('Sync with Server'),
+              ),
+              FloatingActionButton(
+                isExtended: false,
+                onPressed: () {
+                  _showAddTodoBottomSheet(context);
+                },
+                child: const Text('Add Todo'),
+              )
+            ],
           ),
         ],
       ),
