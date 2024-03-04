@@ -5,8 +5,10 @@ import 'package:to_do_local/ui/TermsAndConditionsScreen.dart';
 import 'package:to_do_local/ui/calendar/CalendarScreen.dart';
 import 'package:to_do_local/ui/onboarding/OnboardingScreen.dart';
 import 'package:to_do_local/ui/profile/ProfileScreen.dart';
+import 'package:to_do_local/ui/settings/SettingScreen.dart';
 import 'package:to_do_local/ui/task/TodoScreen.dart';
 import 'package:to_do_local/ui/task/viewmodel/TodoViewModel.dart';
+import 'package:to_do_local/utils/AppPreferences.dart';
 
 void main() {
   runApp(
@@ -49,9 +51,8 @@ class MyApp extends StatelessWidget {
   }
 
   Future<bool> checkIfUserLoggedIn() async {
-    // Implement your logic to check if the user is logged in or not
-    // Return true if the user is logged in, false otherwise
-    return true;
+    bool? isLogin = await AppPreferences.isLoggedIn;
+    return isLogin ?? false;
   }
 }
 
@@ -85,6 +86,12 @@ class _ScreenWithBottomNavState extends State<ScreenWithBottomNav> {
     );
   }
 
+  void _onSettingsClick() {
+    Navigator.pop(context);
+    Navigator.push(context,
+        MaterialPageRoute(builder: (context) => const SettingScreen()));
+  }
+
   void _onTermsAndConditionsTapped() {
     Navigator.pop(context); // Close the drawer before navigating
     Navigator.push(
@@ -108,7 +115,11 @@ class _ScreenWithBottomNavState extends State<ScreenWithBottomNav> {
                   ? AppBar(
                       title: const Text('Profile'),
                     )
-                  : null,
+                  : _currentIndex == 3
+                      ? AppBar(
+                          title: const Text("Settings"),
+                        )
+                      : null,
       // AppBar is null for Privacy Policy and Terms and Conditions screens
       body: _screens[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
@@ -166,6 +177,12 @@ class _ScreenWithBottomNavState extends State<ScreenWithBottomNav> {
               title: const Text('Profile'),
               onTap: () => _onItemTapped(2),
               selected: _currentIndex == 2,
+            ),
+            const Divider(),
+            ListTile(
+              leading: const Icon(Icons.settings),
+              title: const Text("Settings"),
+              onTap: _onSettingsClick,
             ),
             const Divider(), // Add a divider for visual separation
             ListTile(

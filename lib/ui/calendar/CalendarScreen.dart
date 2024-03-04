@@ -30,95 +30,86 @@ class _CalendarScreenState extends State<CalendarScreen> {
     return Scaffold(
       body: Column(
         children: [
-          Expanded(
-            child: SizedBox(
-              child: TableCalendar(
-                firstDay: DateTime.utc(2022, 10, 16),
-                lastDay: DateTime.utc(2030, 3, 14),
-                focusedDay: _focusedDay,
-                selectedDayPredicate: (day) {
-                  return isSameDay(_selectedDay, day);
-                },
-                onDaySelected: (selectedDay, focusedDay) {
-                  setState(() {
-                    _selectedDay = selectedDay;
-                    _focusedDay = focusedDay;
+          TableCalendar(
+            pageAnimationEnabled: true,
+            firstDay: DateTime.utc(2022, 10, 16),
+            lastDay: DateTime.utc(2030, 3, 14),
+            focusedDay: _focusedDay,
+            selectedDayPredicate: (day) {
+              return isSameDay(_selectedDay, day);
+            },
+            onDaySelected: (selectedDay, focusedDay) {
+              setState(() {
+                _selectedDay = selectedDay;
+                _focusedDay = focusedDay;
 
-                    // Fetch todos for the selected date
-                    Provider.of<TodoViewModel>(context, listen: false)
-                        .fetchTodosByDate(selectedDay);
-                    print(selectedDay);
-                  });
-                },
-                eventLoader: (day) {
-                  // Load events for the specified day from your _events map
-                  return _events[day] ?? [];
-                },
-                calendarStyle: const CalendarStyle(
-                  todayDecoration: BoxDecoration(
-                    color: Colors.blue,
-                    // Set the background color for today's date
-                    shape: BoxShape.circle,
+                // Fetch todos for the selected date
+                Provider.of<TodoViewModel>(context, listen: false)
+                    .fetchTodosByDate(selectedDay);
+                print(selectedDay);
+              });
+            },
+            eventLoader: (day) {
+              // Load events for the specified day from your _events map
+              return _events[day] ?? [];
+            },
+            calendarStyle: const CalendarStyle(
+              todayDecoration: BoxDecoration(
+                color: Colors.blue,
+                // Set the background color for today's date
+                shape: BoxShape.circle,
+              ),
+              selectedDecoration: BoxDecoration(
+                color: Colors.green,
+                // Set the background color for the selected date
+                shape: BoxShape.circle,
+              ),
+              selectedTextStyle: TextStyle(
+                color: Colors.white, // Set the text color for the selected date
+              ),
+              todayTextStyle: TextStyle(
+                color: Colors.white, // Set the text color for today's date
+              ),
+              outsideTextStyle: TextStyle(
+                  color: Colors.grey,
+                  fontSize: 12 // Text color for days outside the current month
                   ),
-                  selectedDecoration: BoxDecoration(
-                    color: Colors.green,
-                    // Set the background color for the selected date
-                    shape: BoxShape.circle,
-                  ),
-                  selectedTextStyle: TextStyle(
-                    color: Colors
-                        .white, // Set the text color for the selected date
-                  ),
-                  todayTextStyle: TextStyle(
-                    color: Colors.white, // Set the text color for today's date
-                  ),
-                  outsideTextStyle: TextStyle(
-                      color: Colors.grey,
-                      fontSize:
-                          14 // Text color for days outside the current month
-                      ),
-                ),
-                headerStyle: const HeaderStyle(
-                  formatButtonDecoration: BoxDecoration(
-                    color: Colors.orange,
-                    // Set the background color for the format button
-                    shape: BoxShape.rectangle,
-                  ),
-                  formatButtonTextStyle: TextStyle(
-                    color: Colors
-                        .white, // Set the text color for the format button
-                  ),
-                  titleTextStyle: TextStyle(
-                    color: Colors.black,
-                    // Set the text color for the calendar title
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20,
-                  ),
-                  leftChevronIcon: Icon(
-                    Icons.arrow_left_outlined,
-                    color:
-                        Colors.black, // Set the color for the left chevron icon
-                  ),
-                  rightChevronIcon: Icon(
-                    Icons.arrow_right_outlined,
-                    color: Colors
-                        .black, // Set the color for the right chevron icon
-                  ),
-                ),
-                daysOfWeekStyle: const DaysOfWeekStyle(
-                  weekdayStyle: TextStyle(
-                      color: Colors.black, // Set the text color for weekdays
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14),
-                  weekendStyle: TextStyle(
-                      color: Colors.red, // Set the text color for weekends
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14),
-                ),
+            ),
+            headerStyle: const HeaderStyle(
+              formatButtonDecoration: BoxDecoration(
+                color: Colors.orange,
+                // Set the background color for the format button
+                shape: BoxShape.rectangle,
+              ),
+              formatButtonTextStyle: TextStyle(
+                color: Colors.white, // Set the text color for the format button
+              ),
+              titleTextStyle: TextStyle(
+                color: Colors.black,
+                // Set the text color for the calendar title
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+              leftChevronIcon: Icon(
+                Icons.arrow_left_outlined,
+                color: Colors.black, // Set the color for the left chevron icon
+              ),
+              rightChevronIcon: Icon(
+                Icons.arrow_right_outlined,
+                color: Colors.black, // Set the color for the right chevron icon
               ),
             ),
+            daysOfWeekStyle: const DaysOfWeekStyle(
+              weekdayStyle: TextStyle(
+                  color: Colors.black, // Set the text color for weekdays
+                  fontSize: 12),
+              weekendStyle: TextStyle(
+                  color: Colors.red, // Set the text color for weekends
+                  fontSize: 12),
+            ),
           ),
-          Flexible(
+          const SizedBox(height: 8.0),
+          Expanded(
             child: Consumer<TodoViewModel>(
               builder: (context, viewModel, child) {
                 return ListView.builder(

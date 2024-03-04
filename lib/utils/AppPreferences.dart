@@ -9,7 +9,7 @@ class AppPreferences {
 
   static SharedPreferences get instance {
     if (_prefs == null) {
-      throw Exception("SharedPreferences not initialized. Call init() first.");
+      init();
     }
     return _prefs!;
   }
@@ -63,8 +63,8 @@ class AppPreferences {
     await setPreference<bool>(IS_LOGGED_IN, isLoggedIn);
   }
 
-  static bool get isLoggedIn {
-    bool? value = getPreference<bool>(IS_LOGGED_IN) as bool?;
+  static Future<bool> get isLoggedIn async {
+    bool? value = await getPreference<bool>(IS_LOGGED_IN);
     return value ?? false;
   }
 
@@ -80,6 +80,4 @@ class AppPreferences {
   static Future<void> onLogout() async {
     await clearAllPreferences();
   }
-
-// Add more methods as needed based on your requirements
 }

@@ -207,12 +207,6 @@ class _TodoListScreenState extends State<TodoListScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              ElevatedButton(
-                onPressed: () {
-                  _syncWithServer(context);
-                },
-                child: const Text('Sync with Server'),
-              ),
               FloatingActionButton(
                 isExtended: false,
                 onPressed: () {
@@ -525,26 +519,6 @@ class _TodoListScreenState extends State<TodoListScreen> {
     );
 
     todoViewModel.addTodo(newTodo);
-  }
-
-  void _syncWithServer(BuildContext context) async {
-    final todoViewModel = Provider.of<TodoViewModel>(context, listen: false);
-
-    try {
-      await todoViewModel.syncWithServer();
-      _showSnackbar('Synced with server successfully!', context);
-    } catch (error) {
-      print('Error syncing with server: $error');
-      _showSnackbar('Error syncing with server.', context);
-    }
-  }
-
-  void _showSnackbar(String message, BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-      ),
-    );
   }
 
   @override
