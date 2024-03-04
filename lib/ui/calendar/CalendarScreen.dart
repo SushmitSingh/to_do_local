@@ -42,7 +42,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
               setState(() {
                 _selectedDay = selectedDay;
                 _focusedDay = focusedDay;
-
                 // Fetch todos for the selected date
                 Provider.of<TodoViewModel>(context, listen: false)
                     .fetchTodosByDate(selectedDay);
@@ -76,14 +75,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   ),
             ),
             headerStyle: const HeaderStyle(
-              formatButtonDecoration: BoxDecoration(
-                color: Colors.orange,
-                // Set the background color for the format button
-                shape: BoxShape.rectangle,
-              ),
-              formatButtonTextStyle: TextStyle(
-                color: Colors.white, // Set the text color for the format button
-              ),
               titleTextStyle: TextStyle(
                 color: Colors.black,
                 // Set the text color for the calendar title

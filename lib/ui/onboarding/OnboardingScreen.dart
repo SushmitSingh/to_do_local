@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intro_slider/intro_slider.dart';
-import 'package:to_do_local/ui/auth/PhoneOTPVerification.dart';
+import 'package:to_do_local/ui/auth/LoginScreen.dart';
 
 class OnboardingScreen extends StatelessWidget {
   final List<Slide> slides = [
@@ -129,7 +129,7 @@ class OnboardingScreen extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => const PhoneOTPVerification(),
+            builder: (context) => const LoginScreen(),
           ),
         );
       },
@@ -138,7 +138,7 @@ class OnboardingScreen extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => const PhoneOTPVerification(),
+            builder: (context) => const LoginScreen(),
           ),
         );
       },

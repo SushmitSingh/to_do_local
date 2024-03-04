@@ -205,14 +205,14 @@ class _TodoListScreenState extends State<TodoListScreen> {
             ),
           ),
           Row(
-            mainAxisAlignment: MainAxisAlignment.end,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               FloatingActionButton(
-                isExtended: false,
+                isExtended: true,
                 onPressed: () {
                   _showAddTodoBottomSheet(context);
                 },
-                child: const Text('Add Todo'),
+                child: const Icon(Icons.add_task),
               )
             ],
           ),

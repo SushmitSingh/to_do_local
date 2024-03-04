@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:provider/provider.dart';
+import 'package:to_do_local/utils/AppPreferences.dart';
 
 import '../mainScreen/ScreenWithBottomNav.dart';
 import 'LoginViewModel.dart';
@@ -119,6 +120,7 @@ class __LoginScreenState extends State<_LoginScreen> {
                   }
                 },
                 onLongPress: () async {
+                  AppPreferences.setLoggedIn(true);
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
