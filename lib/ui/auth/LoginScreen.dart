@@ -4,7 +4,7 @@ import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:provider/provider.dart';
 
-import '../../main.dart';
+import '../mainScreen/ScreenWithBottomNav.dart';
 import 'LoginViewModel.dart';
 
 class LoginScreen extends StatelessWidget {

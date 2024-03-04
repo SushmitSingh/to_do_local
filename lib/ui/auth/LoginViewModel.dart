@@ -16,6 +16,9 @@ class LoginViewModel extends ChangeNotifier {
       );
 
       await _auth.signInWithCredential(credential);
+
+      // Notify listeners after successful sign-in
+      notifyListeners();
     } catch (e) {
       // Handle authentication errors
       print(e.toString());
