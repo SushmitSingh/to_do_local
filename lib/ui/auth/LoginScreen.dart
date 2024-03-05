@@ -1,185 +1,186 @@
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:intl_phone_number_input/intl_phone_number_input.dart';
-import 'package:pin_code_fields/pin_code_fields.dart';
-import 'package:provider/provider.dart';
-import 'package:to_do_local/utils/AppPreferences.dart';
+import 'package:flutter/services.dart';
 
-import '../mainScreen/ScreenWithBottomNav.dart';
-import 'LoginViewModel.dart';
+import '../../utils/CustomButton.dart';
+import '../../utils/country_picker.dart';
 
-class LoginScreen extends StatelessWidget {
-  const LoginScreen({Key? key}) : super(key: key);
-
+class LoginScreen extends StatefulWidget {
   @override
-  Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => LoginViewModel(),
-      child: _LoginScreen(),
+  _LoginScreenState createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  final _contactEditingController = TextEditingController();
+  var _dialCode = '';
+
+  //Login click with contact number validation
+  Future<void> clickOnLogin(BuildContext context) async {
+    if (_contactEditingController.text.isEmpty) {
+      showErrorDialog(context, 'Contact number can\'t be empty.');
+    } else {
+      final responseMessage = await Navigator.pushNamed(context, '/otpScreen',
+          arguments: '$_dialCode${_contactEditingController.text}');
+      if (responseMessage != null) {
+        showErrorDialog(context, responseMessage as String);
+      }
+    }
+  }
+
+  //callback function of country picker
+  void _callBackFunction(String name, String dialCode, String flag) {
+    _dialCode = dialCode;
+  }
+
+  //Alert dialogue to show error and response
+  void showErrorDialog(BuildContext context, String message) {
+    // set up the AlertDialog
+    final CupertinoAlertDialog alert = CupertinoAlertDialog(
+      title: const Text('Error'),
+      content: Text('\n$message'),
+      actions: <Widget>[
+        CupertinoDialogAction(
+          isDefaultAction: true,
+          child: const Text('Yes'),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        )
+      ],
+    );
+    // show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
     );
   }
-}
 
-class _LoginScreen extends StatefulWidget {
-  @override
-  __LoginScreenState createState() => __LoginScreenState();
-}
-
-class __LoginScreenState extends State<_LoginScreen> {
-  final TextEditingController _phoneNumberController = TextEditingController();
-  final TextEditingController _otpController = TextEditingController();
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  String _verificationId = '';
-  String _countryCode = '';
-
+  //build method for UI Representation
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              const SizedBox(
-                height: 80,
-                width: 20,
-              ),
-              const Text(
-                'Welcome to Task Manager', // Replace with your description
-                style: TextStyle(
-                  color: Colors.blue,
-                  fontSize: 24.0,
-                  fontWeight: FontWeight.bold,
+      body: Center(
+        child: SingleChildScrollView(
+          child: Container(
+            padding: const EdgeInsets.all(16.0),
+            width: double.infinity,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SizedBox(
+                  height: screenHeight * 0.05,
                 ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(
-                height: 20,
-                width: 20,
-              ),
-              const Text(
-                  'Unlock seamless task management – Login or Sign Up to Task Manager Hub with the ease of Phone OTP for effortless productivity.',
+                Image.asset(
+                  'assets/images/logo.png',
+                  width: screenWidth * 0.7,
+                  fit: BoxFit.contain,
+                ),
+                SizedBox(
+                  height: screenHeight * 0.05,
+                ),
+                Image.asset(
+                  'assets/images/registration.png',
+                  height: screenHeight * 0.3,
+                  fit: BoxFit.contain,
+                ),
+                SizedBox(
+                  height: screenHeight * 0.02,
+                ),
+                const Text(
+                  'Login',
+                  style: TextStyle(fontSize: 28, color: Colors.black),
+                ),
+                SizedBox(
+                  height: screenHeight * 0.02,
+                ),
+                const Text(
+                  'Enter your mobile number to receive a verification code',
+                  textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: Colors.blueGrey,
-                    fontSize: 16.0,
+                    fontSize: 18,
+                    color: Colors.black,
                   ),
-                  textAlign: TextAlign.start),
-              const SizedBox(height: 20),
-              InternationalPhoneNumberInput(
-                onInputChanged: (PhoneNumber number) {
-                  // Handle changes in phone number input
-                  print(number.phoneNumber);
-                  _countryCode = number.dialCode!;
-                },
-                onInputValidated: (bool value) {
-                  // Validate phone number
-                },
-                selectorConfig: const SelectorConfig(
-                  selectorType: PhoneInputSelectorType.DIALOG,
                 ),
-                ignoreBlank: false,
-                autoValidateMode: AutovalidateMode.disabled,
-                selectorTextStyle: const TextStyle(color: Colors.black),
-                textFieldController: _phoneNumberController,
-                formatInput: false,
-                keyboardType: const TextInputType.numberWithOptions(
-                  signed: true,
-                  decimal: true,
+                SizedBox(
+                  height: screenHeight * 0.04,
                 ),
-                inputDecoration: const InputDecoration(
-                  labelText: 'Mobile Number',
-                ),
-                onSaved: (PhoneNumber? number) {
-                  // Save the phone number
-                },
-              ),
-              const SizedBox(height: 20),
-              Container(
-                padding: const EdgeInsets.all(10),
-                child: PinCodeTextField(
-                  controller: _otpController,
-                  keyboardType: TextInputType.number,
-                  hintCharacter: '',
-                  validator: (String? value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter OTP';
-                    }
-                    return null;
-                  },
-                  appContext: this.context,
-                  length: 6,
-                ),
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () async {
-                  // Validate the form
-                  if (_formKey.currentState?.validate() ?? false) {
-                    // Perform login logic here
-                    await _verifyPhoneNumber(context);
-                  }
-                },
-                onLongPress: () async {
-                  AppPreferences.setLoggedIn(true);
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const ScreenWithBottomNav(),
-                    ),
-                  );
-                },
-                child: const Text('Get OTP'),
-              ),
-            ],
+                Container(
+                  margin: EdgeInsets.symmetric(
+                      horizontal: screenWidth > 600 ? screenWidth * 0.2 : 16),
+                  padding: const EdgeInsets.all(16.0),
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      // ignore: prefer_const_literals_to_create_immutables
+                      boxShadow: [
+                        const BoxShadow(
+                          color: Colors.grey,
+                          offset: Offset(0.0, 1.0), //(x,y)
+                          blurRadius: 6.0,
+                        ),
+                      ],
+                      borderRadius: BorderRadius.circular(16.0)),
+                  child: Column(
+                    children: [
+                      Container(
+                        margin: const EdgeInsets.all(8),
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        height: 45,
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: const Color.fromARGB(255, 253, 188, 51),
+                          ),
+                          borderRadius: BorderRadius.circular(36),
+                        ),
+                        child: Row(
+                          // ignore: prefer_const_literals_to_create_immutables
+                          children: [
+                            CountryPicker(
+                              callBackFunction: _callBackFunction,
+                              headerText: 'Select Country',
+                              headerBackgroundColor:
+                                  Theme.of(context).primaryColor,
+                              headerTextColor: Colors.white,
+                            ),
+                            SizedBox(
+                              width: screenWidth * 0.01,
+                            ),
+                            Expanded(
+                              child: TextField(
+                                decoration: const InputDecoration(
+                                  hintText: 'Contact Number',
+                                  border: InputBorder.none,
+                                  enabledBorder: InputBorder.none,
+                                  focusedBorder: InputBorder.none,
+                                  contentPadding:
+                                      EdgeInsets.symmetric(vertical: 13.5),
+                                ),
+                                controller: _contactEditingController,
+                                keyboardType: TextInputType.number,
+                                inputFormatters: [
+                                  LengthLimitingTextInputFormatter(10)
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 8,
+                      ),
+                      CustomButton(clickOnLogin),
+                    ],
+                  ),
+                )
+              ],
+            ),
           ),
         ),
       ),
     );
-  }
-
-  Future<void> _verifyPhoneNumber(BuildContext context) async {
-    try {
-      verificationCompleted(PhoneAuthCredential phoneAuthCredential) async {
-        await Provider.of<LoginViewModel>(context, listen: false)
-            .signInWithPhoneNumber(
-          _phoneNumberController.text,
-          phoneAuthCredential.verificationId!,
-          phoneAuthCredential.smsCode!,
-        );
-
-        // Navigate to TodoScreen after successful login
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const ScreenWithBottomNav(),
-          ),
-        );
-      }
-
-      verificationFailed(FirebaseAuthException authException) {
-        // Handle verification failed
-        print('Verification Failed: ${authException.message}');
-      }
-
-      codeSent(String verificationId, int? resendToken) async {
-        _verificationId = verificationId;
-      }
-
-      codeAutoRetrievalTimeout(String verificationId) {
-        _verificationId = verificationId;
-      }
-
-      await FirebaseAuth.instance.verifyPhoneNumber(
-        phoneNumber: '$_countryCode${_phoneNumberController.text}',
-        verificationCompleted: verificationCompleted,
-        verificationFailed: verificationFailed,
-        codeSent: codeSent,
-        codeAutoRetrievalTimeout: codeAutoRetrievalTimeout,
-        timeout: const Duration(seconds: 60),
-      );
-    } catch (e) {
-      // Handle exceptions
-      print(e.toString());
-    }
   }
 }

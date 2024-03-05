@@ -9,7 +9,7 @@ class AppPreferences {
 
   static SharedPreferences get instance {
     if (_prefs == null) {
-      init();
+      throw Exception("SharedPreferences not initialized. Call init() first.");
     }
     return _prefs!;
   }
@@ -64,8 +64,8 @@ class AppPreferences {
   }
 
   static Future<bool> get isLoggedIn async {
-    bool? value = await getPreference<bool>(IS_LOGGED_IN);
-    return value ?? false;
+    bool value = await getPreference<bool>(IS_LOGGED_IN) ?? false;
+    return value;
   }
 
   static Future<void> setOnboardingCompleted(bool isOnboardingCompleted) async {
