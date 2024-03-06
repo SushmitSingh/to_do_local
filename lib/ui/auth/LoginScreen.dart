@@ -12,7 +12,7 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _contactEditingController = TextEditingController();
-  var _dialCode = '';
+  var _dialCode = '+91';
 
   //Login click with contact number validation
   Future<void> clickOnLogin(BuildContext context) async {
@@ -29,7 +29,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   //callback function of country picker
   void _callBackFunction(String name, String dialCode, String flag) {
-    _dialCode = dialCode;
+    _dialCode = "+91";
   }
 
   //Alert dialogue to show error and response

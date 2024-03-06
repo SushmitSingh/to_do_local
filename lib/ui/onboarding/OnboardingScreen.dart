@@ -156,7 +156,7 @@ class OnboardingScreen extends StatelessWidget {
   }
 
   Widget renderNextBtn() {
-    return Icon(
+    return const Icon(
       Icons.navigate_next,
       color: Colors.blue,
       size: 35.0,
@@ -164,14 +164,14 @@ class OnboardingScreen extends StatelessWidget {
   }
 
   Widget renderDoneBtn() {
-    return Icon(
+    return const Icon(
       Icons.done,
       color: Colors.blue,
     );
   }
 
   Widget renderSkipBtn() {
-    return Icon(
+    return const Icon(
       Icons.skip_next,
       color: Colors.blue,
     );

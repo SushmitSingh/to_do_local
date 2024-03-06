@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>API_KEY</key>
+	<string>AIzaSyDyVs6Y2CbWlWM8SympOr-8ZLEp1VKhM6k</string>
+	<key>GCM_SENDER_ID</key>
+	<string>867883458042</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.example.toDoLocal</string>
+	<key>PROJECT_ID</key>
+	<string>fir-function-api-3a7c7</string>
+	<key>STORAGE_BUCKET</key>
+	<string>fir-function-api-3a7c7.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:867883458042:ios:a80d815cc4036ad4f01843</string>
+	<key>DATABASE_URL</key>
+	<string>https://fir-function-api-3a7c7-default-rtdb.firebaseio.com</string>
+</dict>
+</plist>

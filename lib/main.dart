@@ -1,5 +1,4 @@
-import 'dart:io';
-
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -9,17 +8,14 @@ import 'package:to_do_local/ui/onboarding/OnboardingScreen.dart';
 import 'package:to_do_local/ui/task/viewmodel/TodoViewModel.dart';
 import 'package:to_do_local/utils/AppPreferences.dart';
 
+import 'firebase_options.dart';
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   AppPreferences.init();
-  Platform.isAndroid
-      ? await Firebase.initializeApp(
-          options: const FirebaseOptions(
-              apiKey: 'AIzaSyBZ3NKxX9U55jh8QsL2NGqV5U029TKbXJc',
-              appId: '1:881211077216:android:8325bcdf6d11acdca08905',
-              messagingSenderId: '881211077216',
-              projectId: 'fireaseotp'))
-      : await Firebase.initializeApp();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
   runApp(
     MultiProvider(
@@ -50,7 +46,7 @@ class _MyAppState extends State<MyApp> {
           } else if (snapshot.hasError) {
             return Text('Error: ${snapshot.error}');
           } else {
-            bool userLoggedIn = false;
+            bool userLoggedIn = snapshot.data ?? false;
 
             if (userLoggedIn) {
               return const ScreenWithBottomNav();
@@ -62,14 +58,14 @@ class _MyAppState extends State<MyApp> {
       ),
       routes: <String, WidgetBuilder>{
         '/otpScreen': (BuildContext ctx) => OtpScreen(),
-        //'/homeScreen': (BuildContext ctx) => HomeScreen(),
+        '/homeScreen': (BuildContext ctx) => const ScreenWithBottomNav(),
       },
     );
   }
 
   Future<bool> checkIfUserLoggedIn() async {
-    AppPreferences.init().whenComplete(() => null);
-    bool isLogin = await AppPreferences.isLoggedIn;
-    return isLogin;
+    // Check if there is a current user
+    final currentUser = FirebaseAuth.instance.currentUser;
+    return currentUser != null;
   }
 }

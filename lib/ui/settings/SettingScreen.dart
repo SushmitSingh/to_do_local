@@ -1,6 +1,8 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../auth/LoginScreen.dart';
 import '../task/viewmodel/TodoViewModel.dart';
 
 class SettingScreen extends StatefulWidget {
@@ -22,7 +24,13 @@ class _SettingScreenState extends State<SettingScreen> {
           ElevatedButton(
               child: const Text('Logout'),
               onPressed: () {
-                //Logout From FireBase
+                FirebaseAuth.instance.signOut();
+                Navigator.pop(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => LoginScreen(),
+                  ),
+                );
               }),
           ElevatedButton(
             onPressed: () {
