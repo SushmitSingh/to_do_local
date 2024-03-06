@@ -11,7 +11,8 @@ class OnboardingScreen extends StatelessWidget {
           text: 'Welcome to Your\nTask Manager',
           style: TextStyle(
             color: Colors.blue,
-            fontSize: 24.0,
+            fontSize: 26.0,
+            height: 1.6,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -33,6 +34,7 @@ class OnboardingScreen extends StatelessWidget {
             style: TextStyle(
               color: Colors.blue,
               fontSize: 24.0,
+              height: 1.6,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -41,7 +43,8 @@ class OnboardingScreen extends StatelessWidget {
             'Effortlessly add tasks and events to keep your schedule organized and stress-free.',
         styleTitle: const TextStyle(
           color: Colors.blue,
-          fontSize: 24.0,
+          fontSize: 26.0,
+          height: 1.6,
           fontWeight: FontWeight.bold,
         ),
         styleDescription: const TextStyle(
@@ -58,7 +61,8 @@ class OnboardingScreen extends StatelessWidget {
             text: 'Stay Organized \nWith The Calendar',
             style: TextStyle(
               color: Colors.blue,
-              fontSize: 24.0,
+              height: 1.6,
+              fontSize: 26.0,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -67,7 +71,8 @@ class OnboardingScreen extends StatelessWidget {
             'Utilize our integrated calendar to manage your events, appointments, and deadlines seamlessly.',
         styleTitle: const TextStyle(
           color: Colors.blue,
-          fontSize: 24.0,
+          fontSize: 26.0,
+          height: 1.6,
           fontWeight: FontWeight.bold,
         ),
         styleDescription: const TextStyle(
@@ -92,7 +97,7 @@ class OnboardingScreen extends StatelessWidget {
             'Create and customize your profile to personalize your task management experience.',
         styleTitle: const TextStyle(
           color: Colors.blue,
-          fontSize: 24.0,
+          fontSize: 26.0,
           fontWeight: FontWeight.bold,
         ),
         styleDescription: const TextStyle(
@@ -108,21 +113,22 @@ class OnboardingScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return IntroSlider(
       key: UniqueKey(),
+
+      // Skip button
+      renderSkipBtn: renderSkipBtn(),
+      skipButtonStyle: myButtonStyle(),
+
+      // Next button
+      renderNextBtn: renderNextBtn(),
+      nextButtonStyle: myButtonStyle(),
+
+      // Done button
+      renderDoneBtn: renderDoneBtn(),
+      doneButtonStyle: myButtonStyle(),
+
       backgroundColorAllSlides: Colors.white,
       colorActiveDot: Colors.blue,
       colorDot: Colors.lightBlueAccent,
-      skipButtonStyle: ButtonStyle(
-        backgroundColor: MaterialStateProperty.resolveWith((states) {
-          // If the button is pressed, return green, otherwise blue
-          if (states.contains(MaterialState.pressed)) {
-            return Colors.green;
-          }
-          return Colors.blue;
-        }),
-        textStyle: MaterialStateProperty.resolveWith((states) {
-          return const TextStyle(color: Colors.white);
-        }),
-      ),
       slides: slides,
       onDonePress: () {
         // Navigate to TodoListScreenWithBottomNav on Done press
@@ -142,10 +148,41 @@ class OnboardingScreen extends StatelessWidget {
           ),
         );
       },
-      scrollPhysics: const BouncingScrollPhysics(),
+      scrollPhysics: const PageScrollPhysics(),
       autoScroll: true,
       loopAutoScroll: true,
       curveScroll: Curves.bounceIn,
+    );
+  }
+
+  Widget renderNextBtn() {
+    return Icon(
+      Icons.navigate_next,
+      color: Colors.blue,
+      size: 35.0,
+    );
+  }
+
+  Widget renderDoneBtn() {
+    return Icon(
+      Icons.done,
+      color: Colors.blue,
+    );
+  }
+
+  Widget renderSkipBtn() {
+    return Icon(
+      Icons.skip_next,
+      color: Colors.blue,
+    );
+  }
+
+  ButtonStyle myButtonStyle() {
+    return ButtonStyle(
+      shape: MaterialStateProperty.all<OutlinedBorder>(const StadiumBorder()),
+      backgroundColor:
+          MaterialStateProperty.all<Color>(const Color(0xffb4d6ef)),
+      overlayColor: MaterialStateProperty.all<Color>(const Color(0xffb4d6ef)),
     );
   }
 }

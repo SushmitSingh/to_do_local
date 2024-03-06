@@ -76,15 +76,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   height: screenHeight * 0.05,
                 ),
                 Image.asset(
-                  'assets/images/logo.png',
-                  width: screenWidth * 0.7,
-                  fit: BoxFit.contain,
-                ),
-                SizedBox(
-                  height: screenHeight * 0.05,
-                ),
-                Image.asset(
-                  'assets/images/registration.png',
+                  'assets/boarding/3onboarding.png',
                   height: screenHeight * 0.3,
                   fit: BoxFit.contain,
                 ),
@@ -93,7 +85,10 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const Text(
                   'Login',
-                  style: TextStyle(fontSize: 28, color: Colors.black),
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 26,
+                      color: Colors.blue),
                 ),
                 SizedBox(
                   height: screenHeight * 0.02,
@@ -102,8 +97,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   'Enter your mobile number to receive a verification code',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontSize: 18,
-                    color: Colors.black,
+                    fontSize: 16,
+                    color: Colors.blueGrey,
                   ),
                 ),
                 SizedBox(
@@ -129,15 +124,14 @@ class _LoginScreenState extends State<LoginScreen> {
                       Container(
                         margin: const EdgeInsets.all(8),
                         padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        height: 45,
                         decoration: BoxDecoration(
                           border: Border.all(
-                            color: const Color.fromARGB(255, 253, 188, 51),
+                            color: Colors.blue,
                           ),
-                          borderRadius: BorderRadius.circular(36),
+                          borderRadius: BorderRadius.circular(10),
                         ),
                         child: Row(
-                          // ignore: prefer_const_literals_to_create_immutables
+                          //  ignore: prefer_const_literals_to_create_immutables
                           children: [
                             CountryPicker(
                               callBackFunction: _callBackFunction,
@@ -151,14 +145,18 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                             Expanded(
                               child: TextField(
+                                cursorColor: Colors.blue,
                                 decoration: const InputDecoration(
-                                  hintText: 'Contact Number',
-                                  border: InputBorder.none,
-                                  enabledBorder: InputBorder.none,
-                                  focusedBorder: InputBorder.none,
-                                  contentPadding:
-                                      EdgeInsets.symmetric(vertical: 13.5),
-                                ),
+                                    icon: Icon(Icons.phone),
+                                    iconColor: Colors.blue,
+                                    hintText: 'Contact Number',
+                                    border: InputBorder.none,
+                                    enabledBorder: InputBorder.none,
+                                    focusedBorder: InputBorder.none,
+                                    contentPadding:
+                                        EdgeInsets.symmetric(vertical: 10),
+                                    hintStyle:
+                                        TextStyle(color: Colors.blueGrey)),
                                 controller: _contactEditingController,
                                 keyboardType: TextInputType.number,
                                 inputFormatters: [
@@ -170,7 +168,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                       const SizedBox(
-                        height: 8,
+                        height: 20,
                       ),
                       CustomButton(clickOnLogin),
                     ],

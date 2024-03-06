@@ -29,7 +29,8 @@ class _OtpScreenState extends State<OtpScreen> {
     super.didChangeDependencies();
     // Load data only once after screen load
     if (widget._isInit) {
-      widget._contact = '${ModalRoute.of(context)?.settings.arguments as String}';
+      widget._contact =
+          '${ModalRoute.of(context)?.settings.arguments as String}';
       generateOtp(widget._contact);
       widget._isInit = false;
     }
@@ -61,15 +62,7 @@ class _OtpScreenState extends State<OtpScreen> {
                   height: screenHeight * 0.05,
                 ),
                 Image.asset(
-                  'assets/images/logo.png',
-                  width: screenWidth * 0.7,
-                  fit: BoxFit.contain,
-                ),
-                SizedBox(
-                  height: screenHeight * 0.05,
-                ),
-                Image.asset(
-                  'assets/images/registration.png',
+                  'assets/boarding/3onboarding.png',
                   height: screenHeight * 0.3,
                   fit: BoxFit.contain,
                 ),
@@ -78,7 +71,7 @@ class _OtpScreenState extends State<OtpScreen> {
                 ),
                 const Text(
                   'Verification',
-                  style: TextStyle(fontSize: 28, color: Colors.black),
+                  style: TextStyle(fontSize: 26, color: Colors.blue),
                 ),
                 SizedBox(
                   height: screenHeight * 0.02,
@@ -87,15 +80,16 @@ class _OtpScreenState extends State<OtpScreen> {
                   'Enter A 6 digit number that was sent to ${widget._contact}',
                   textAlign: TextAlign.center,
                   style: const TextStyle(
-                    fontSize: 18,
-                    color: Colors.black,
+                    fontSize: 16,
+                    color: Colors.blueGrey,
                   ),
                 ),
                 SizedBox(
                   height: screenHeight * 0.04,
                 ),
                 Container(
-                  margin: EdgeInsets.symmetric(horizontal: screenWidth > 600 ? screenWidth * 0.2 : 16),
+                  margin: EdgeInsets.symmetric(
+                      horizontal: screenWidth > 600 ? screenWidth * 0.2 : 16),
                   padding: const EdgeInsets.all(16.0),
                   decoration: BoxDecoration(
                       color: Colors.white,
@@ -137,13 +131,14 @@ class _OtpScreenState extends State<OtpScreen> {
                           height: 45,
                           width: double.infinity,
                           decoration: BoxDecoration(
-                            color: const Color.fromARGB(255, 253, 188, 51),
-                            borderRadius: BorderRadius.circular(36),
+                            color: Colors.blue,
+                            borderRadius: BorderRadius.circular(10),
                           ),
                           alignment: Alignment.center,
                           child: const Text(
                             'Verify',
-                            style: TextStyle(color: Colors.black, fontSize: 16.0),
+                            style:
+                                TextStyle(color: Colors.white, fontSize: 16.0),
                           ),
                         ),
                       ),
@@ -196,10 +191,9 @@ class _OtpScreenState extends State<OtpScreen> {
       final User? currentUser = _auth.currentUser;
       assert(user.user?.uid == currentUser?.uid);
       Navigator.pushReplacementNamed(context, '/homeScreen');
-    } on PlatformException catch(e){
+    } on PlatformException catch (e) {
       handleError(e);
-    }
-    catch (e) {
+    } catch (e) {
       print('error $e');
     }
   }

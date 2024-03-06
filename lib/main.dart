@@ -11,6 +11,7 @@ import 'package:to_do_local/utils/AppPreferences.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  AppPreferences.init();
   Platform.isAndroid
       ? await Firebase.initializeApp(
           options: const FirebaseOptions(
