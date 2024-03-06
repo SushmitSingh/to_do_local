@@ -25,7 +25,7 @@ class _SettingScreenState extends State<SettingScreen> {
               child: const Text('Logout'),
               onPressed: () {
                 FirebaseAuth.instance.signOut();
-                Navigator.pop(
+                Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
                     builder: (context) => LoginScreen(),
