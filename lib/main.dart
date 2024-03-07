@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:to_do_local/ui/auth/OtpScreen.dart';
 import 'package:to_do_local/ui/mainScreen/ScreenWithBottomNav.dart';
 import 'package:to_do_local/ui/onboarding/OnboardingScreen.dart';
 import 'package:to_do_local/ui/task/viewmodel/TodoViewModel.dart';
@@ -37,24 +38,27 @@ class App extends StatelessWidget {
     return Consumer<ThemeProvider>(
       builder: (context, themeProvider, child) {
         return MaterialApp(
-          debugShowCheckedModeBanner: false,
-          themeMode: themeProvider.selectedThemeMode,
-          theme: ThemeData(
-            brightness: Brightness.light,
-            primarySwatch: AppColors.getMaterialColorFromColor(
-              themeProvider.selectedPrimaryColor,
+            debugShowCheckedModeBanner: false,
+            themeMode: themeProvider.selectedThemeMode,
+            theme: ThemeData(
+              brightness: Brightness.light,
+              primarySwatch: AppColors.getMaterialColorFromColor(
+                themeProvider.selectedPrimaryColor,
+              ),
+              primaryColor: themeProvider.selectedPrimaryColor,
             ),
-            primaryColor: themeProvider.selectedPrimaryColor,
-          ),
-          darkTheme: ThemeData(
-            brightness: Brightness.dark,
-            primarySwatch: AppColors.getMaterialColorFromColor(
-              themeProvider.selectedPrimaryColor,
+            darkTheme: ThemeData(
+              brightness: Brightness.dark,
+              primarySwatch: AppColors.getMaterialColorFromColor(
+                themeProvider.selectedPrimaryColor,
+              ),
+              primaryColor: themeProvider.selectedPrimaryColor,
             ),
-            primaryColor: themeProvider.selectedPrimaryColor,
-          ),
-          home: child ?? MyApp(),
-        );
+            home: child ?? MyApp(),
+            routes: <String, WidgetBuilder>{
+              '/otpScreen': (BuildContext ctx) => OtpScreen(),
+              '/homeScreen': (BuildContext ctx) => const ScreenWithBottomNav(),
+            });
       },
     );
   }
