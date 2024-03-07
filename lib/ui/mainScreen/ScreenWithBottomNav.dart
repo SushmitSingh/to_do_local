@@ -8,7 +8,7 @@ import '../settings/SettingScreen.dart';
 import '../task/TodoScreen.dart';
 
 class ScreenWithBottomNav extends StatefulWidget {
-  const ScreenWithBottomNav({super.key});
+  const ScreenWithBottomNav({Key? key}) : super(key: key);
 
   @override
   _ScreenWithBottomNavState createState() => _ScreenWithBottomNavState();
@@ -39,15 +39,19 @@ class _ScreenWithBottomNavState extends State<ScreenWithBottomNav> {
 
   void _onSettingsClick() {
     Navigator.pop(context);
-    Navigator.push(context,
-        MaterialPageRoute(builder: (context) => const SettingScreen()));
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const SettingScreen()),
+    );
   }
 
   void _onTermsAndConditionsTapped() {
     Navigator.pop(context); // Close the drawer before navigating
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const TermsAndConditionsScreen()),
+      MaterialPageRoute(
+        builder: (context) => const TermsAndConditionsScreen(),
+      ),
     );
   }
 
@@ -82,7 +86,7 @@ class _ScreenWithBottomNavState extends State<ScreenWithBottomNav> {
         },
         items: const [
           BottomNavigationBarItem(
-            icon: Icon(Icons.check),
+            icon: Icon(Icons.task),
             label: 'Todo',
           ),
           BottomNavigationBarItem(
@@ -94,42 +98,28 @@ class _ScreenWithBottomNavState extends State<ScreenWithBottomNav> {
             label: 'Profile',
           ),
         ],
+        selectedFontSize: 14,
+        selectedItemColor: Theme.of(context).primaryColor,
       ),
       drawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
-            const DrawerHeader(
+            DrawerHeader(
               decoration: BoxDecoration(
-                color: Colors.blue,
+                color: Theme.of(context).primaryColor,
               ),
-              child: Text(
-                'Menu',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
+              child: const Padding(
+                padding: EdgeInsets.all(8.0),
+                child: Text(
+                  'Todo Menu',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 30,
+                  ),
                 ),
               ),
             ),
-            ListTile(
-              leading: const Icon(Icons.check),
-              title: const Text('Todo'),
-              onTap: () => _onItemTapped(0),
-              selected: _currentIndex == 0,
-            ),
-            ListTile(
-              leading: const Icon(Icons.calendar_today),
-              title: const Text('Calendar'),
-              onTap: () => _onItemTapped(1),
-              selected: _currentIndex == 1,
-            ),
-            ListTile(
-              leading: const Icon(Icons.person),
-              title: const Text('Profile'),
-              onTap: () => _onItemTapped(2),
-              selected: _currentIndex == 2,
-            ),
-            const Divider(),
             ListTile(
               leading: const Icon(Icons.settings),
               title: const Text("Settings"),

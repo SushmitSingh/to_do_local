@@ -2,11 +2,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:to_do_local/ui/auth/OtpScreen.dart';
 import 'package:to_do_local/ui/mainScreen/ScreenWithBottomNav.dart';
 import 'package:to_do_local/ui/onboarding/OnboardingScreen.dart';
 import 'package:to_do_local/ui/task/viewmodel/TodoViewModel.dart';
+import 'package:to_do_local/utils/AppColors.dart';
 import 'package:to_do_local/utils/AppPreferences.dart';
+import 'package:to_do_local/utils/ThemeProvider.dart';
 
 import 'firebase_options.dart';
 
@@ -21,44 +22,63 @@ Future<void> main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => TodoViewModel()),
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
         // Add other providers if needed
       ],
-      child: MyApp(),
+      child: App(),
     ),
   );
 }
 
-class MyApp extends StatefulWidget {
-  @override
-  State<MyApp> createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
+class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: FutureBuilder<bool>(
-        future: checkIfUserLoggedIn(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const CircularProgressIndicator();
-          } else if (snapshot.hasError) {
-            return Text('Error: ${snapshot.error}');
-          } else {
-            bool userLoggedIn = snapshot.data ?? false;
+    print('Rebuilt App!');
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, child) {
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          themeMode: themeProvider.selectedThemeMode,
+          theme: ThemeData(
+            brightness: Brightness.light,
+            primarySwatch: AppColors.getMaterialColorFromColor(
+              themeProvider.selectedPrimaryColor,
+            ),
+            primaryColor: themeProvider.selectedPrimaryColor,
+          ),
+          darkTheme: ThemeData(
+            brightness: Brightness.dark,
+            primarySwatch: AppColors.getMaterialColorFromColor(
+              themeProvider.selectedPrimaryColor,
+            ),
+            primaryColor: themeProvider.selectedPrimaryColor,
+          ),
+          home: child ?? MyApp(),
+        );
+      },
+    );
+  }
+}
 
-            if (userLoggedIn) {
-              return const ScreenWithBottomNav();
-            } else {
-              return OnboardingScreen();
-            }
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<bool>(
+      future: checkIfUserLoggedIn(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const CircularProgressIndicator();
+        } else if (snapshot.hasError) {
+          return Text('Error: ${snapshot.error}');
+        } else {
+          bool userLoggedIn = snapshot.data ?? false;
+
+          if (userLoggedIn) {
+            return ScreenWithBottomNav();
+          } else {
+            return OnboardingScreen();
           }
-        },
-      ),
-      routes: <String, WidgetBuilder>{
-        '/otpScreen': (BuildContext ctx) => OtpScreen(),
-        '/homeScreen': (BuildContext ctx) => const ScreenWithBottomNav(),
+        }
       },
     );
   }

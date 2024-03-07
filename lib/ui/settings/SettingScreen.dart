@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:to_do_local/utils/ThemeSwitcher.dart';
 
 import '../auth/LoginScreen.dart';
 import '../task/viewmodel/TodoViewModel.dart';
@@ -19,7 +20,7 @@ class _SettingScreenState extends State<SettingScreen> {
       appBar: AppBar(
         title: const Text("Settings"),
       ),
-      body: Row(
+      body: Column(
         children: [
           ElevatedButton(
               child: const Text('Logout'),
@@ -38,6 +39,12 @@ class _SettingScreenState extends State<SettingScreen> {
             },
             child: const Text('Sync with Server'),
           ),
+          ThemeSwitcher(),
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 10),
+            child: Text('Primary Color'),
+          ),
+          PrimaryColorSwitcher(),
         ],
       ),
     );

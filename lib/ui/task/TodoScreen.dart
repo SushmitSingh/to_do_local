@@ -51,16 +51,23 @@ class _TodoListScreenState extends State<TodoListScreen> {
                     itemBuilder: (context, index) {
                       final tag = viewModel.tags[index];
                       return Card(
-                        elevation: 2,
-                        child: Row(children: [
-                          Text(
-                            tag.tagName,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontSize: 14,
-                            ),
-                          ),
-                        ]),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                        elevation: 1,
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Row(children: [
+                            const Icon(Icons.tag),
+                            Text(
+                              tag.tagName,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                fontSize: 14,
+                              ),
+                            )
+                          ]),
+                        ),
                       );
                     },
                   );
@@ -71,20 +78,30 @@ class _TodoListScreenState extends State<TodoListScreen> {
           Expanded(
             child: Consumer<TodoViewModel>(
               builder: (context, viewModel, child) {
-                return ListView.builder(
-                  itemCount: viewModel.todos.length,
-                  itemBuilder: (context, index) {
-                    final todo = viewModel.todos[index];
-                    return Card(
-                      elevation: 2,
-                      child: ExpansionTile(
-                        initiallyExpanded: false,
-                        title: Row(
-                          children: [
-                            SizedBox(
-                              height: 30,
-                              width: 30,
-                              child: Checkbox(
+                return Padding(
+                  padding: const EdgeInsets.all(0),
+                  child: ListView.builder(
+                    itemCount: viewModel.todos.length,
+                    itemBuilder: (context, index) {
+                      final todo = viewModel.todos[index];
+                      return Card(
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10)),
+                        child: ExpansionTile(
+                          initiallyExpanded: false,
+                          title: Row(
+                            children: [
+                              Checkbox(
+                                visualDensity: VisualDensity.compact,
+                                checkColor: Colors.green,
+                                fillColor:
+                                    MaterialStateProperty.resolveWith((states) {
+                                  // If the button is pressed, return green, otherwise blue
+                                  if (states.contains(MaterialState.selected)) {
+                                    return Colors.white;
+                                  }
+                                  return Colors.white;
+                                }),
                                 value: todo.status == 'completed',
                                 onChanged: (value) {
                                   if (value != null && value) {
@@ -94,17 +111,13 @@ class _TodoListScreenState extends State<TodoListScreen> {
                                   }
                                 },
                               ),
-                            ),
-                            Flexible(
-                              child: Padding(
-                                padding: const EdgeInsets.only(left: 8),
+                              Flexible(
                                 child: Text(
                                   todo.task,
                                   style: TextStyle(
-                                    letterSpacing: 0.5,
                                     overflow: TextOverflow.fade,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
+                                    fontWeight: FontWeight.normal,
+                                    fontSize: 18,
                                     color: todo.status == 'completed'
                                         ? Colors.green
                                         : todo.status == 'expired'
@@ -116,105 +129,97 @@ class _TodoListScreenState extends State<TodoListScreen> {
                                   ),
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              for (var subtaskIndex = 0;
-                                  subtaskIndex < todo.subtasks.length;
-                                  subtaskIndex++)
-                                Container(
-                                  padding: const EdgeInsets.only(
-                                      left: 8, right: 8, top: 2, bottom: 2),
-                                  child: Row(
+                            ],
+                          ),
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                for (var subtaskIndex = 0;
+                                    subtaskIndex < todo.subtasks.length;
+                                    subtaskIndex++)
+                                  Row(
                                     children: [
-                                      Text(
-                                        (subtaskIndex + 1).toString(),
-                                        textAlign: TextAlign.center,
-                                        style: const TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 16),
+                                      Checkbox(
+                                        visualDensity: VisualDensity.compact,
+                                        checkColor: Colors.green,
+                                        fillColor:
+                                            MaterialStateProperty.resolveWith(
+                                                (states) {
+                                          // If the button is pressed, return green, otherwise blue
+                                          if (states.contains(
+                                              MaterialState.selected)) {
+                                            return Colors.white;
+                                          }
+                                          return Colors.white;
+                                        }),
+                                        value: todo
+                                            .subtasks[subtaskIndex].completed,
+                                        onChanged: (value) {
+                                          todo.subtasks[subtaskIndex]
+                                              .completed = value ?? false;
+                                          viewModel.updateSubtaskStatus(todo,
+                                              todo.subtasks[subtaskIndex]);
+                                        },
                                       ),
-                                      SizedBox(
-                                        height: 25,
-                                        width: 25,
-                                        child: Checkbox(
-                                          value: todo
-                                              .subtasks[subtaskIndex].completed,
-                                          onChanged: (value) {
-                                            todo.subtasks[subtaskIndex]
-                                                .completed = value ?? false;
-                                            viewModel.updateSubtaskStatus(todo,
-                                                todo.subtasks[subtaskIndex]);
-                                          },
-                                        ),
-                                      ),
-                                      Container(
-                                        padding: const EdgeInsets.only(
-                                            top: 2,
-                                            bottom: 2,
-                                            right: 8,
-                                            left: 8),
-                                        child: Text.rich(
-                                          TextSpan(
-                                            text: todo
-                                                .subtasks[subtaskIndex].task,
-                                            style: TextStyle(
-                                              color: todo.subtasks[subtaskIndex]
-                                                          .completed ==
-                                                      true
-                                                  ? Colors.green
-                                                  : Colors.grey,
-                                              decoration:
-                                                  todo.subtasks[subtaskIndex]
-                                                              .completed ==
-                                                          true
-                                                      ? TextDecoration
-                                                          .lineThrough
-                                                      : TextDecoration.none,
-                                            ),
+                                      Text.rich(
+                                        TextSpan(
+                                          text:
+                                              todo.subtasks[subtaskIndex].task,
+                                          style: TextStyle(
+                                            color: todo.subtasks[subtaskIndex]
+                                                        .completed ==
+                                                    true
+                                                ? Colors.green
+                                                : Colors.grey,
+                                            decoration: todo
+                                                        .subtasks[subtaskIndex]
+                                                        .completed ==
+                                                    true
+                                                ? TextDecoration.lineThrough
+                                                : TextDecoration.none,
                                           ),
                                         ),
                                       ),
                                     ],
                                   ),
-                                ),
-                              Container(
-                                padding: const EdgeInsets.all(8),
-                                child: Row(
+                                Row(
                                   crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [
                                     Flexible(
                                       child: Text(
-                                          'Tag: ${todo.tag.tagName} ,Date: ${todo.createDate}-${todo.endDate}'),
+                                          'Tag: ${"${todo.tag.tagName}\n"}Date: ${todo.createDate.day}-${todo.endDate.day}'),
                                     ),
                                   ],
-                                ),
-                              )
-                            ],
-                          ),
-                        ],
-                      ),
-                    );
-                  },
+                                )
+                              ],
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
                 );
               },
             ),
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              FloatingActionButton(
-                isExtended: true,
-                onPressed: () {
-                  _showAddTodoBottomSheet(context);
-                },
-                child: const Icon(Icons.add_task),
-              )
-            ],
+          Padding(
+            padding: const EdgeInsets.all(15.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                FloatingActionButton(
+                  backgroundColor: Colors.white,
+                  elevation: 5.0,
+                  isExtended: true,
+                  onPressed: () {
+                    _showAddTodoBottomSheet(context);
+                  },
+                  child: Icon(
+                      color: Theme.of(context).primaryColor, Icons.add_task),
+                )
+              ],
+            ),
           ),
         ],
       ),
