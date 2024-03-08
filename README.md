@@ -17,3 +17,5 @@ samples, guidance on mobile development, and a full API reference.
 
 
 Fix Home and Functions
+
+add edit and delete for todo
