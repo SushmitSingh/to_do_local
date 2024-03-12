@@ -1,0 +1,295 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:to_do_local/ui/task/viewmodel/TodoViewModel.dart';
+
+import 'model/Todo.dart';
+
+class AddEditTodoBottomSheet extends StatefulWidget {
+  final Todo? todo;
+  final Function(Todo) onUpdateTodo;
+
+  AddEditTodoBottomSheet({Key? key, this.todo, required this.onUpdateTodo})
+      : super(key: key);
+
+  @override
+  _AddEditTodoBottomSheetState createState() => _AddEditTodoBottomSheetState();
+}
+
+class _AddEditTodoBottomSheetState extends State<AddEditTodoBottomSheet> {
+  final TextEditingController _tagTypeController = TextEditingController();
+  String task = '';
+  DateTime createDate = DateTime.now();
+  DateTime endDate = DateTime.now();
+  String status = 'pending';
+  String selectedTag = 'personal';
+  List<Subtask> subtasks = [];
+
+  Todo? _updatedTodo;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.todo != null) {
+      task = widget.todo!.task;
+      createDate = widget.todo!.createDate;
+      endDate = widget.todo!.endDate;
+      status = widget.todo!.status;
+      selectedTag = widget.todo!.tag.tagName;
+      subtasks.addAll(widget.todo!.subtasks);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      resizeToAvoidBottomInset: true,
+      body: SingleChildScrollView(
+        child: Container(
+          margin:
+              EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Text(
+                'Edit Todo',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 20),
+              TextFormField(
+                initialValue: task,
+                onChanged: (value) {
+                  task = value;
+                },
+                decoration: const InputDecoration(labelText: 'Task'),
+              ),
+              const SizedBox(height: 20),
+              Text('Create Date: ${createDate.toLocal()}'),
+              ElevatedButton(
+                onPressed: () async {
+                  final selectedDate = await showDatePicker(
+                    context: context,
+                    initialDate: createDate,
+                    firstDate: DateTime(2000),
+                    lastDate: DateTime(2101),
+                  );
+
+                  if (selectedDate != null && selectedDate != createDate) {
+                    setState(() {
+                      createDate = selectedDate;
+                    });
+                  }
+                },
+                child: const Text('Select Create Date'),
+              ),
+              const SizedBox(height: 20),
+              Text('End Date: ${endDate.toLocal()}'),
+              ElevatedButton(
+                onPressed: () async {
+                  final selectedDate = await showDatePicker(
+                    context: context,
+                    initialDate: endDate,
+                    firstDate: DateTime(2000),
+                    lastDate: DateTime(2101),
+                  );
+
+                  if (selectedDate != null && selectedDate != endDate) {
+                    setState(() {
+                      endDate = selectedDate;
+                    });
+                  }
+                },
+                child: const Text('Select End Date'),
+              ),
+              const SizedBox(height: 20),
+              const Text('Status'),
+              DropdownButton<String>(
+                value: status,
+                onChanged: (value) {
+                  setState(() {
+                    status = value!;
+                  });
+                },
+                items:
+                    ['pending', 'completed', 'expire', 'other'].map((status) {
+                  return DropdownMenuItem<String>(
+                    value: status,
+                    child: Text(status),
+                  );
+                }).toList(),
+              ),
+              const SizedBox(height: 20),
+              const Text('Tag'),
+              FutureBuilder<List<TagType>>(
+                future: _fetchAllTagTypes(context),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    List<String> tagTypeNames = snapshot.data!
+                        .map((tagType) => tagType.tagName)
+                        .toList();
+
+                    return DropdownButton<String>(
+                      value: selectedTag,
+                      onChanged: (value) {
+                        setState(() {
+                          selectedTag = value!;
+                          if (selectedTag == 'createNewTag') {
+                            _showAddTagTypeDialog(context);
+                          }
+                        });
+                      },
+                      items: [
+                        ...tagTypeNames.map((tagName) {
+                          return DropdownMenuItem<String>(
+                            value: tagName,
+                            child: Text(tagName),
+                          );
+                        }),
+                        if (!tagTypeNames.contains(selectedTag))
+                          DropdownMenuItem<String>(
+                            value: selectedTag,
+                            child: Text(selectedTag),
+                          ),
+                        const DropdownMenuItem<String>(
+                          value: 'createNewTag',
+                          child: Text('Create New Tag'),
+                        ),
+                      ],
+                    );
+                  } else if (snapshot.hasError) {
+                    return const Text('Error loading tag types');
+                  } else {
+                    return const CircularProgressIndicator();
+                  }
+                },
+              ),
+              const SizedBox(height: 20),
+              Wrap(
+                spacing: 8.0,
+                runSpacing: 4.0,
+                children: subtasks.map((subtask) {
+                  return Chip(
+                    label: Text(subtask.task),
+                    onDeleted: () {
+                      setState(() {
+                        subtasks.remove(subtask);
+                      });
+                    },
+                  );
+                }).toList(),
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  _showAddSubtaskDialog(context);
+                },
+                child: const Text('Add Subtask'),
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  _saveTodo();
+                  Navigator.of(context).pop();
+                },
+                child: const Text('Save Locally'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<List<TagType>> _fetchAllTagTypes(BuildContext context) async {
+    final todoViewModel = Provider.of<TodoViewModel>(context, listen: false);
+    return await todoViewModel.fetchTags();
+  }
+
+  void _saveTodo() {
+    final newTodo = Todo(
+      task: task,
+      key: widget.todo?.key ?? DateTime.now().millisecondsSinceEpoch.toString(),
+      subtasks: subtasks,
+      createDate: createDate,
+      endDate: endDate,
+      status: status,
+      tag: TagType(tagName: selectedTag, icon: Icons.cabin),
+    );
+
+    widget.onUpdateTodo(newTodo);
+
+    Provider.of<TodoViewModel>(context, listen: false)
+        .updateTodoStatus(newTodo, newTodo.status);
+  }
+
+  void _showAddSubtaskDialog(BuildContext context) {
+    String subtaskName = '';
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Add Subtask'),
+          content: TextField(
+            onChanged: (value) {
+              subtaskName = value;
+            },
+            decoration: const InputDecoration(labelText: 'Subtask'),
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  subtasks.add(Subtask(task: subtaskName, completed: false));
+                });
+                Navigator.of(context).pop();
+              },
+              child: const Text('Add Subtask'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showAddTagTypeDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Create New Tag'),
+          content: TextField(
+            controller: _tagTypeController,
+            decoration: const InputDecoration(labelText: 'Tag Name'),
+          ),
+          actions: [
+            ElevatedButton(
+              onPressed: () {
+                final newTagType = TagType(
+                  tagName: _tagTypeController.text,
+                  icon: Icons.tag,
+                );
+
+                Provider.of<TodoViewModel>(context, listen: false)
+                    .addTagType(newTagType);
+
+                Navigator.pop(context);
+              },
+              child: const Text('Create'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}

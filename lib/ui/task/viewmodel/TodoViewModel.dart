@@ -71,15 +71,11 @@ class TodoViewModel extends ChangeNotifier {
     try {
       // Retrieve the todos that need to be synced (e.g., unsynced or modified)
       List<Todo> unsyncedTodos = _todos.where((todo) => !todo.synced).toList();
-
-      // TODO: Implement logic to send unsyncedTodos to the server and receive updates
-
       // Mark synced todos as synced
       for (var syncedTodo in unsyncedTodos) {
         syncedTodo.synced = true;
         await _repository.updateTodo(syncedTodo);
       }
-
       await _fetchTodos(); // Refresh the local list after syncing
     } catch (error) {
       print('Error syncing with server: $error');
@@ -144,19 +140,13 @@ class TodoViewModel extends ChangeNotifier {
     }
   }
 
-  // Example method to get todos within a date range
-  Future<void> fetchTodosByDateRange(
-      DateTime startDate, DateTime endDate) async {
-    try {
-      _todos = await _repository.getTodosByDateRange(startDate, endDate);
-      notifyListeners();
-    } catch (error) {
-      print('Error fetching todos by date range: $error');
-    }
-  }
-
   Future<void> addTagType(TagType tagType) async {
     await _repository.addTagType(tagType);
+    await fetchTags();
+  }
+
+  void deleteTodo(Todo todo) async {
+    await _repository.deleteTodo(todo);
     await fetchTags();
   }
 }

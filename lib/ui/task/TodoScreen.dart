@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'AddEditTodoBottomSheet.dart';
 import 'model/Todo.dart';
 import 'viewmodel/TodoViewModel.dart';
 
@@ -128,7 +129,7 @@ class _TodoListScreenState extends State<TodoListScreen> {
                                         : TextDecoration.none,
                                   ),
                                 ),
-                              ),
+                              )
                             ],
                           ),
                           children: [
@@ -190,6 +191,18 @@ class _TodoListScreenState extends State<TodoListScreen> {
                                       child: Text(
                                           'Tag: ${"${todo.tag.tagName}\n"}Date: ${todo.createDate.day}-${todo.endDate.day}'),
                                     ),
+                                    IconButton(
+                                      icon: Icon(Icons.edit),
+                                      onPressed: () {
+                                        _editTodo(context, todo);
+                                      },
+                                    ),
+                                    IconButton(
+                                      icon: Icon(Icons.delete),
+                                      onPressed: () {
+                                        _deleteTodo(context, todo);
+                                      },
+                                    )
                                   ],
                                 )
                               ],
@@ -213,7 +226,7 @@ class _TodoListScreenState extends State<TodoListScreen> {
                   elevation: 5.0,
                   isExtended: true,
                   onPressed: () {
-                    _showAddTodoBottomSheet(context);
+                    _showAddEditTodoBottomSheet(context, null);
                   },
                   child: Icon(
                       color: Theme.of(context).primaryColor, Icons.add_task),
@@ -226,199 +239,17 @@ class _TodoListScreenState extends State<TodoListScreen> {
     );
   }
 
-  void _showAddTodoBottomSheet(BuildContext context) {
-    String task = '';
-    DateTime createDate = DateTime.now();
-    DateTime endDate = DateTime.now();
-    String status = 'pending';
-    String selectedTag = 'personal'; // Default tag
-    List<Subtask> subtasks = [];
-
-    GlobalKey<FormState> formKey = GlobalKey<FormState>();
-    FocusNode focusNode = FocusNode();
-
+  void _showAddEditTodoBottomSheet(BuildContext context, Todo? todo) {
     showModalBottomSheet(
-      isScrollControlled: true,
       context: context,
       builder: (BuildContext context) {
-        return Container(
-          margin: EdgeInsets.only(
-              bottom:
-                  MediaQuery.of(context).viewInsets.bottom), // Keyboard margin
-          padding: const EdgeInsets.all(20),
-          child: StatefulBuilder(
-            builder: (context, setState) {
-              return FutureBuilder<List<TagType>>(
-                future: _fetchAllTagTypes(),
-                builder: (context, snapshot) {
-                  /*if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const CircularProgressIndicator();
-                  } else */
-                  if (snapshot.hasError) {
-                    return const Text('Error loading tag types');
-                  } else {
-                    List<String> tagTypeNames = snapshot.data
-                            ?.map((tagType) => tagType.tagName)
-                            .toList() ??
-                        [];
-
-                    return Form(
-                      key: formKey,
-                      child: SingleChildScrollView(
-                        child: Container(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            children: [
-                              const Text(
-                                'Add Todo',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              TextFormField(
-                                key: const ValueKey('unique_key_for_textfield'),
-                                focusNode: focusNode,
-                                onChanged: (value) {
-                                  setState(() {
-                                    task = value;
-                                  });
-                                },
-                                decoration:
-                                    const InputDecoration(labelText: 'Task'),
-                              ),
-                              const SizedBox(height: 8),
-                              Text('Create Date: ${createDate.toLocal()}'),
-                              ElevatedButton(
-                                onPressed: () async {
-                                  final selectedDate = await showDatePicker(
-                                    context: context,
-                                    initialDate: createDate,
-                                    firstDate: DateTime(2000),
-                                    lastDate: DateTime(2101),
-                                  );
-
-                                  if (selectedDate != null &&
-                                      selectedDate != createDate) {
-                                    setState(() {
-                                      createDate = selectedDate;
-                                    });
-                                  }
-                                },
-                                child: const Text('Select Create Date'),
-                              ),
-                              const SizedBox(height: 8),
-                              Text('End Date: ${endDate.toLocal()}'),
-                              ElevatedButton(
-                                onPressed: () async {
-                                  final selectedDate = await showDatePicker(
-                                    context: context,
-                                    initialDate: endDate,
-                                    firstDate: DateTime(2000),
-                                    lastDate: DateTime(2101),
-                                  );
-
-                                  if (selectedDate != null &&
-                                      selectedDate != endDate) {
-                                    setState(() {
-                                      endDate = selectedDate;
-                                    });
-                                  }
-                                },
-                                child: const Text('Select End Date'),
-                              ),
-                              const SizedBox(height: 8),
-                              const Text('Status'),
-                              DropdownButton<String>(
-                                value: status,
-                                onChanged: (value) {
-                                  setState(() {
-                                    status = value!;
-                                  });
-                                },
-                                items: [
-                                  'pending',
-                                  'completed',
-                                  'expire',
-                                  'other'
-                                ].map((status) {
-                                  return DropdownMenuItem<String>(
-                                    value: status,
-                                    child: Text(status),
-                                  );
-                                }).toList(),
-                              ),
-                              const SizedBox(height: 8),
-                              const Text('Tag'),
-                              DropdownButton<String>(
-                                value: selectedTag,
-                                onChanged: (value) {
-                                  setState(() {
-                                    selectedTag = value!;
-                                  });
-
-                                  // If 'Create New Tag' is selected, clear the text field
-                                  if (selectedTag == 'createNewTag') {
-                                    setState(() {
-                                      selectedTag = '';
-                                    });
-                                    _showAddTagTypeDialog(context);
-                                  }
-                                },
-                                items: [
-                                  ...tagTypeNames.map((tagName) {
-                                    return DropdownMenuItem<String>(
-                                      value: tagName,
-                                      child: Text(tagName),
-                                    );
-                                  }),
-                                  if (!tagTypeNames.contains(selectedTag))
-                                    DropdownMenuItem<String>(
-                                      value: selectedTag,
-                                      child: Text(selectedTag),
-                                    ),
-                                  const DropdownMenuItem<String>(
-                                    value: 'createNewTag',
-                                    child: Text('Create New Tag'),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 8),
-                              ElevatedButton(
-                                onPressed: () {
-                                  _showAddSubtaskDialog(
-                                      context, subtasks, setState);
-                                },
-                                child: const Text('Add Subtask'),
-                              ),
-                              const SizedBox(height: 16),
-                              ElevatedButton(
-                                onPressed: () {
-                                  _saveTodoLocal(
-                                    context,
-                                    task,
-                                    createDate,
-                                    endDate,
-                                    status,
-                                    selectedTag,
-                                    subtasks,
-                                  );
-
-                                  Navigator.of(context).pop();
-                                },
-                                child: const Text('Save Locally'),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    );
-                  }
-                },
-              );
-            },
-          ),
+        return AddEditTodoBottomSheet(
+          todo: todo,
+          onUpdateTodo: (updatedTodo) {
+            final todoViewModel =
+                Provider.of<TodoViewModel>(context, listen: false);
+            todoViewModel.updateTodoStatus(updatedTodo, updatedTodo.status);
+          },
         );
       },
     );
@@ -524,6 +355,39 @@ class _TodoListScreenState extends State<TodoListScreen> {
     );
 
     todoViewModel.addTodo(newTodo);
+  }
+
+  void _editTodo(BuildContext context, Todo todo) {
+    _showAddEditTodoBottomSheet(context, todo);
+  }
+
+  void _deleteTodo(BuildContext context, Todo todo) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Confirm Delete'),
+          content: Text('Are you sure you want to delete this todo?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: Text('No'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+                final todoViewModel =
+                    Provider.of<TodoViewModel>(context, listen: false);
+                todoViewModel.deleteTodo(todo);
+              },
+              child: Text('Yes'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override

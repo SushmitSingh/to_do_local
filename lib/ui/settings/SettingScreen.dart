@@ -52,7 +52,6 @@ class _SettingScreenState extends State<SettingScreen> {
 
   void _syncWithServer(BuildContext context) async {
     final todoViewModel = Provider.of<TodoViewModel>(context, listen: false);
-
     try {
       await todoViewModel.syncWithServer();
     } catch (error) {
