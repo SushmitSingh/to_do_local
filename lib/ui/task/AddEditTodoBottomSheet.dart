@@ -26,6 +26,14 @@ class _AddEditTodoBottomSheetState extends State<AddEditTodoBottomSheet> {
 
   Todo? _updatedTodo;
 
+  String get _todoTitle {
+    if (widget.todo != null) {
+      return "Edit Todo";
+    } else {
+      return "Create New";
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -51,10 +59,10 @@ class _AddEditTodoBottomSheetState extends State<AddEditTodoBottomSheet> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text(
-                'Edit Todo',
+              Text(
+                _todoTitle,
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
@@ -221,9 +229,13 @@ class _AddEditTodoBottomSheetState extends State<AddEditTodoBottomSheet> {
     );
 
     widget.onUpdateTodo(newTodo);
+    final todoViewModel = Provider.of<TodoViewModel>(context, listen: false);
 
-    Provider.of<TodoViewModel>(context, listen: false)
-        .updateTodoStatus(newTodo, newTodo.status);
+    if (_todoTitle == "Create New") {
+      todoViewModel.updateTodo(newTodo, newTodo.subtasks as Subtask);
+    } else {
+      todoViewModel.addTodo(newTodo);
+    }
   }
 
   void _showAddSubtaskDialog(BuildContext context) {

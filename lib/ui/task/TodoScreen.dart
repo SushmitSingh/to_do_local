@@ -159,7 +159,7 @@ class _TodoListScreenState extends State<TodoListScreen> {
                                         onChanged: (value) {
                                           todo.subtasks[subtaskIndex]
                                               .completed = value ?? false;
-                                          viewModel.updateSubtaskStatus(todo,
+                                          viewModel.updateTodo(todo,
                                               todo.subtasks[subtaskIndex]);
                                         },
                                       ),

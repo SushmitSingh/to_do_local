@@ -102,7 +102,7 @@ class TodoViewModel extends ChangeNotifier {
     }
   }
 
-  void updateSubtaskStatus(Todo todo, Subtask subtask) {
+  Future<void> updateTodo(Todo todo, Subtask subtask) async {
     try {
       // Find the index of the subtask in the todo's subtasks list
       int subtaskIndex = todo.subtasks.indexOf(subtask);
@@ -112,7 +112,7 @@ class TodoViewModel extends ChangeNotifier {
         todo.subtasks[subtaskIndex].completed = subtask.completed;
 
         // Update the todo in the database
-        _repository.updateTodo(todo);
+        await _repository.updateTodo(todo);
 
         // Notify listeners to update the UI
         notifyListeners();

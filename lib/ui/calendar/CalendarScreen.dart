@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
 
-import '../../bin/server.dart';
+import '../task/AddEditTodoBottomSheet.dart';
+import '../task/model/Todo.dart';
 import '../task/viewmodel/TodoViewModel.dart';
 
 class CalendarScreen extends StatefulWidget {
@@ -103,141 +104,194 @@ class _CalendarScreenState extends State<CalendarScreen> {
           Expanded(
             child: Consumer<TodoViewModel>(
               builder: (context, viewModel, child) {
-                return ListView.builder(
-                  itemCount: viewModel.todos.length,
-                  itemBuilder: (context, index) {
-                    final todo = viewModel.todos[index];
-                    return Card(
-                      elevation: 2,
-                      child: ExpansionTile(
-                        initiallyExpanded: false,
-                        title: Row(
-                          children: [
-                            SizedBox(
-                              height: 30,
-                              width: 30,
-                              child: Checkbox(
-                                value: todo.status == 'completed',
+                return Padding(
+                  padding: const EdgeInsets.all(0),
+                  child: ListView.builder(
+                    itemCount: viewModel.todos.length,
+                    itemBuilder: (context, index) {
+                      final todo = viewModel.todos[index];
+                      return Card(
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10)),
+                        child: ExpansionTile(
+                          initiallyExpanded: false,
+                          title: Row(
+                            children: [
+                              Checkbox(
+                                visualDensity: VisualDensity.compact,
+                                checkColor: Colors.green,
+                                fillColor:
+                                    MaterialStateProperty.resolveWith((states) {
+                                  // If the button is pressed, return green, otherwise blue
+                                  if (states.contains(MaterialState.selected)) {
+                                    return Colors.white;
+                                  }
+                                  return Colors.white;
+                                }),
+                                value: todo.status == 'Completed',
                                 onChanged: (value) {
                                   if (value != null && value) {
                                     viewModel.completeTodo(todo);
                                   } else {
-                                    viewModel.updateTodoStatus(todo, 'pending');
+                                    viewModel.updateTodoStatus(todo, 'Pending');
                                   }
                                 },
                               ),
-                            ),
-                            Flexible(
-                              child: Padding(
-                                padding: const EdgeInsets.only(left: 8),
+                              Flexible(
                                 child: Text(
                                   todo.task,
                                   style: TextStyle(
-                                    letterSpacing: 0.5,
                                     overflow: TextOverflow.fade,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                    color: todo.status == 'completed'
+                                    fontWeight: FontWeight.normal,
+                                    fontSize: 18,
+                                    color: todo.status == 'Completed'
                                         ? Colors.green
-                                        : todo.status == 'expired'
+                                        : todo.status == 'Expired'
                                             ? Colors.red
                                             : Colors.black,
-                                    decoration: todo.status == 'completed'
+                                    decoration: todo.status == 'Completed'
                                         ? TextDecoration.lineThrough
                                         : TextDecoration.none,
                                   ),
                                 ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              for (var subtaskIndex = 0;
-                                  subtaskIndex < todo.subtasks.length;
-                                  subtaskIndex++)
-                                Container(
-                                  padding: const EdgeInsets.only(
-                                      left: 8, right: 8, top: 2, bottom: 2),
-                                  child: Row(
+                              )
+                            ],
+                          ),
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                for (var subtaskIndex = 0;
+                                    subtaskIndex < todo.subtasks.length;
+                                    subtaskIndex++)
+                                  Row(
                                     children: [
-                                      Text(
-                                        (subtaskIndex + 1).toString(),
-                                        textAlign: TextAlign.center,
-                                        style: const TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 16),
+                                      Checkbox(
+                                        visualDensity: VisualDensity.compact,
+                                        checkColor: Colors.green,
+                                        fillColor:
+                                            MaterialStateProperty.resolveWith(
+                                                (states) {
+                                          // If the button is pressed, return green, otherwise blue
+                                          if (states.contains(
+                                              MaterialState.selected)) {
+                                            return Colors.white;
+                                          }
+                                          return Colors.white;
+                                        }),
+                                        value: todo
+                                            .subtasks[subtaskIndex].completed,
+                                        onChanged: (value) {
+                                          todo.subtasks[subtaskIndex]
+                                              .completed = value ?? false;
+                                          viewModel.updateTodo(todo,
+                                              todo.subtasks[subtaskIndex]);
+                                        },
                                       ),
-                                      SizedBox(
-                                        height: 25,
-                                        width: 25,
-                                        child: Checkbox(
-                                          value: todo
-                                              .subtasks[subtaskIndex].completed,
-                                          onChanged: (value) {
-                                            todo.subtasks[subtaskIndex]
-                                                .completed = value ?? false;
-                                            viewModel.updateSubtaskStatus(todo,
-                                                todo.subtasks[subtaskIndex]);
-                                          },
-                                        ),
-                                      ),
-                                      Container(
-                                        padding: const EdgeInsets.only(
-                                            top: 2,
-                                            bottom: 2,
-                                            right: 8,
-                                            left: 8),
-                                        child: Text.rich(
-                                          TextSpan(
-                                            text: todo
-                                                .subtasks[subtaskIndex].task,
-                                            style: TextStyle(
-                                              color: todo.subtasks[subtaskIndex]
-                                                          .completed ==
-                                                      true
-                                                  ? Colors.green
-                                                  : Colors.grey,
-                                              decoration:
-                                                  todo.subtasks[subtaskIndex]
-                                                              .completed ==
-                                                          true
-                                                      ? TextDecoration
-                                                          .lineThrough
-                                                      : TextDecoration.none,
-                                            ),
+                                      Text.rich(
+                                        TextSpan(
+                                          text:
+                                              todo.subtasks[subtaskIndex].task,
+                                          style: TextStyle(
+                                            color: todo.subtasks[subtaskIndex]
+                                                        .completed ==
+                                                    true
+                                                ? Colors.green
+                                                : Colors.grey,
+                                            decoration: todo
+                                                        .subtasks[subtaskIndex]
+                                                        .completed ==
+                                                    true
+                                                ? TextDecoration.lineThrough
+                                                : TextDecoration.none,
                                           ),
                                         ),
                                       ),
                                     ],
                                   ),
-                                ),
-                              Container(
-                                padding: const EdgeInsets.all(8),
-                                child: Row(
+                                Row(
                                   crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [
                                     Flexible(
                                       child: Text(
-                                          'Tag: ${todo.tag}, Date: ${todo.createDate}-${todo.endDate}'),
+                                          'Tag: ${"${todo.tag.tagName}\n"}Date: ${todo.createDate.day}-${todo.endDate.day}'),
                                     ),
+                                    IconButton(
+                                      icon: Icon(Icons.edit),
+                                      onPressed: () {
+                                        _editTodo(context, todo);
+                                      },
+                                    ),
+                                    IconButton(
+                                      icon: Icon(Icons.delete),
+                                      onPressed: () {
+                                        _deleteTodo(context, todo);
+                                      },
+                                    )
                                   ],
-                                ),
-                              )
-                            ],
-                          ),
-                        ],
-                      ),
-                    );
-                  },
+                                )
+                              ],
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
                 );
               },
             ),
           ),
         ],
       ),
+    );
+  }
+
+  void _editTodo(BuildContext context, Todo todo) {
+    _showAddEditTodoBottomSheet(context, todo);
+  }
+
+  void _showAddEditTodoBottomSheet(BuildContext context, Todo? todo) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return AddEditTodoBottomSheet(
+          todo: todo,
+          onUpdateTodo: (updatedTodo) {
+            final todoViewModel =
+                Provider.of<TodoViewModel>(context, listen: false);
+            todoViewModel.updateTodoStatus(updatedTodo, updatedTodo.status);
+          },
+        );
+      },
+    );
+  }
+
+  void _deleteTodo(BuildContext context, Todo todo) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Confirm Delete'),
+          content: Text('Are you sure you want to delete this todo?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: Text('No'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+                final todoViewModel =
+                    Provider.of<TodoViewModel>(context, listen: false);
+                todoViewModel.deleteTodo(todo);
+              },
+              child: Text('Yes'),
+            ),
+          ],
+        );
+      },
     );
   }
 }
