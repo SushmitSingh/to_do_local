@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart' as intl;
 import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
 
@@ -105,7 +106,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
             child: Consumer<TodoViewModel>(
               builder: (context, viewModel, child) {
                 return Padding(
-                  padding: const EdgeInsets.all(0),
+                  padding: const EdgeInsets.only(left: 5.0, right: 5.0),
                   child: ListView.builder(
                     itemCount: viewModel.todos.length,
                     itemBuilder: (context, index) {
@@ -114,26 +115,30 @@ class _CalendarScreenState extends State<CalendarScreen> {
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10)),
                         child: ExpansionTile(
+                          iconColor: Theme.of(context).primaryColor,
                           initiallyExpanded: false,
+                          backgroundColor:
+                              Theme.of(context).primaryColor.withAlpha(5),
+                          shape: const Border(),
                           title: Row(
                             children: [
                               Checkbox(
-                                visualDensity: VisualDensity.compact,
+                                visualDensity: const VisualDensity(
+                                    horizontal: -4.0, vertical: -4.0),
                                 checkColor: Colors.green,
                                 fillColor:
                                     MaterialStateProperty.resolveWith((states) {
-                                  // If the button is pressed, return green, otherwise blue
                                   if (states.contains(MaterialState.selected)) {
                                     return Colors.white;
                                   }
                                   return Colors.white;
                                 }),
-                                value: todo.status == 'Completed',
+                                value: todo.status == 'completed',
                                 onChanged: (value) {
                                   if (value != null && value) {
                                     viewModel.completeTodo(todo);
                                   } else {
-                                    viewModel.updateTodoStatus(todo, 'Pending');
+                                    viewModel.updateTodoStatus(todo, 'pending');
                                   }
                                 },
                               ),
@@ -143,13 +148,16 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                   style: TextStyle(
                                     overflow: TextOverflow.fade,
                                     fontWeight: FontWeight.normal,
-                                    fontSize: 18,
-                                    color: todo.status == 'Completed'
-                                        ? Colors.green
-                                        : todo.status == 'Expired'
+                                    fontSize: 16,
+                                    color: todo.status == 'completed'
+                                        ? Colors.green.shade600
+                                        : todo.status == 'expired'
                                             ? Colors.red
-                                            : Colors.black,
-                                    decoration: todo.status == 'Completed'
+                                            : Theme.of(context)
+                                                .textTheme
+                                                .bodyMedium
+                                                ?.color,
+                                    decoration: todo.status == 'completed'
                                         ? TextDecoration.lineThrough
                                         : TextDecoration.none,
                                   ),
@@ -169,6 +177,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                       Checkbox(
                                         visualDensity: VisualDensity.compact,
                                         checkColor: Colors.green,
+                                        focusColor: Colors.grey,
                                         fillColor:
                                             MaterialStateProperty.resolveWith(
                                                 (states) {
@@ -196,8 +205,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                             color: todo.subtasks[subtaskIndex]
                                                         .completed ==
                                                     true
-                                                ? Colors.green
-                                                : Colors.grey,
+                                                ? Colors.grey
+                                                : Theme.of(context)
+                                                    .textTheme
+                                                    .bodyMedium
+                                                    ?.color,
                                             decoration: todo
                                                         .subtasks[subtaskIndex]
                                                         .completed ==
@@ -209,26 +221,84 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                       ),
                                     ],
                                   ),
-                                Row(
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  children: [
-                                    Flexible(
-                                      child: Text(
-                                          'Tag: ${"${todo.tag.tagName}\n"}Date: ${todo.createDate.day}-${todo.endDate.day}'),
-                                    ),
-                                    IconButton(
-                                      icon: Icon(Icons.edit),
-                                      onPressed: () {
-                                        _editTodo(context, todo);
-                                      },
-                                    ),
-                                    IconButton(
-                                      icon: Icon(Icons.delete),
-                                      onPressed: () {
-                                        _deleteTodo(context, todo);
-                                      },
-                                    )
-                                  ],
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Row(
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      Flexible(
+                                        child: Flexible(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Row(
+                                                children: [
+                                                  Padding(
+                                                    padding:
+                                                        const EdgeInsets.only(
+                                                            left: 5,
+                                                            right: 5,
+                                                            top: 2,
+                                                            bottom: 2),
+                                                    child: Icon(
+                                                        Icons.signpost_rounded,
+                                                        color: Theme.of(context)
+                                                            .primaryColor
+                                                            .withAlpha(100)),
+                                                  ),
+                                                  Text(
+                                                    todo.tag.tagName,
+                                                    style: const TextStyle(
+                                                        fontSize: 14,
+                                                        color: Colors.grey),
+                                                  ),
+                                                ],
+                                              ),
+                                              Row(
+                                                children: [
+                                                  Padding(
+                                                    padding:
+                                                        const EdgeInsets.only(
+                                                            left: 5,
+                                                            right: 5,
+                                                            top: 2,
+                                                            bottom: 2),
+                                                    child: Icon(
+                                                        Icons.access_time,
+                                                        color: Theme.of(context)
+                                                            .primaryColor
+                                                            .withAlpha(100)),
+                                                  ),
+                                                  Text(
+                                                    intl.DateFormat.yMMMEd()
+                                                        .format(todo.todoDate),
+                                                    style: const TextStyle(
+                                                        fontSize: 12,
+                                                        color: Colors.grey),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                      IconButton(
+                                        icon: Icon(Icons.edit,
+                                            color: Colors.green.withAlpha(200)),
+                                        onPressed: () {
+                                          _editTodo(context, todo);
+                                        },
+                                      ),
+                                      IconButton(
+                                        icon: Icon(Icons.delete,
+                                            color: Colors.red.withAlpha(200)),
+                                        onPressed: () {
+                                          _deleteTodo(context, todo);
+                                        },
+                                      )
+                                    ],
+                                  ),
                                 )
                               ],
                             ),

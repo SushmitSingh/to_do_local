@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../PrivacyPolicyScreen.dart';
 import '../TermsAndConditionsScreen.dart';
 import '../calendar/CalendarScreen.dart';
 import '../profile/ProfileScreen.dart';
 import '../settings/SettingScreen.dart';
+import '../task/AddEditTodoBottomSheet.dart';
 import '../task/TodoScreen.dart';
+import '../task/model/Todo.dart';
+import '../task/viewmodel/TodoViewModel.dart';
 
 class ScreenWithBottomNav extends StatefulWidget {
   const ScreenWithBottomNav({Key? key}) : super(key: key);
@@ -58,6 +62,16 @@ class _ScreenWithBottomNavState extends State<ScreenWithBottomNav> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButtonLocation: FloatingActionButtonLocation.miniEndFloat,
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.white,
+        elevation: 5.0,
+        isExtended: true,
+        onPressed: () {
+          _showAddEditTodoBottomSheet(context, null);
+        },
+        child: Icon(color: Theme.of(context).primaryColor, Icons.add_task),
+      ),
       appBar: _currentIndex == 0
           ? AppBar(
               title: const Text('Todo'),
@@ -139,6 +153,22 @@ class _ScreenWithBottomNavState extends State<ScreenWithBottomNav> {
           ],
         ),
       ),
+    );
+  }
+
+  void _showAddEditTodoBottomSheet(BuildContext context, Todo? todo) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return AddEditTodoBottomSheet(
+          todo: todo,
+          onUpdateTodo: (updatedTodo) {
+            final todoViewModel =
+                Provider.of<TodoViewModel>(context, listen: false);
+            todoViewModel.updateTodoStatus(updatedTodo, updatedTodo.status);
+          },
+        );
+      },
     );
   }
 }

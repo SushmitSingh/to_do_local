@@ -23,7 +23,7 @@ class DatabaseProvider {
     await _initializeDatabase();
 
     final store = intMapStoreFactory.store(_todosStoreName);
-    final finder = Finder(sortOrders: [SortOrder('createDate')]);
+    final finder = Finder(sortOrders: [SortOrder('todoDate')]);
     final todosSnapshots = await store.find(_database, finder: finder);
 
     // Ensure the database is closed after fetching data
@@ -43,8 +43,7 @@ class DatabaseProvider {
           task: snapshot['task'] as String? ?? "",
           key: snapshot['key'] as String? ?? "",
           subtasks: subtasks,
-          createDate: DateTime.parse(snapshot['createDate'] as String? ?? ""),
-          endDate: DateTime.parse(snapshot['endDate'] as String? ?? ""),
+          todoDate: DateTime.parse(snapshot['todoDate'] as String? ?? ""),
           status: snapshot['status'] as String? ?? "",
           tag: TagType.fromMap(snapshot['tag'] as Map<String, dynamic>?));
     }).toList();
@@ -95,8 +94,7 @@ class DatabaseProvider {
         task: snapshot['task'] as String,
         key: snapshot['key'] as String,
         subtasks: subtasks,
-        createDate: DateTime.parse(snapshot['createDate'] as String),
-        endDate: DateTime.parse(snapshot['endDate'] as String),
+        todoDate: DateTime.parse(snapshot['todoDate'] as String),
         status: snapshot['status'] as String,
         tag: tag,
       );
@@ -112,11 +110,11 @@ class DatabaseProvider {
     final store = intMapStoreFactory.store(_todosStoreName);
     final finder = Finder(
       filter: Filter.or([
-        Filter.equals('createDate', selectedDateTime.toIso8601String()),
+        Filter.equals('todoDate', selectedDateTime.toIso8601String()),
         Filter.equals('endDate', selectedDateTime.toIso8601String()),
         Filter.and([
           Filter.greaterThanOrEquals(
-              'createDate', selectedDateTime.toIso8601String()),
+              'todoDate', selectedDateTime.toIso8601String()),
           Filter.lessThanOrEquals('endDate',
               selectedDateTime.add(const Duration(days: 1)).toIso8601String()),
         ]),
@@ -136,8 +134,7 @@ class DatabaseProvider {
         task: snapshot['task'] as String,
         key: snapshot['key'] as String,
         subtasks: subtasks,
-        createDate: DateTime.parse(snapshot['createDate'] as String),
-        endDate: DateTime.parse(snapshot['endDate'] as String),
+        todoDate: DateTime.parse(snapshot['todoDate'] as String),
         status: snapshot['status'] as String,
         tag: snapshot['tag'] as TagType,
       );
@@ -208,8 +205,7 @@ class DatabaseProvider {
       'task': todo.task,
       'key': todo.key,
       'subtasks': todo.subtasks.map((subtask) => subtask.toMap()).toList(),
-      'createDate': todo.createDate.toIso8601String(),
-      'endDate': todo.endDate.toIso8601String(),
+      'todoDate': todo.todoDate.toIso8601String(),
       'status': todo.status,
       'tag':
           todo.tag.toJson(), // Convert TagType to a format suitable for storage

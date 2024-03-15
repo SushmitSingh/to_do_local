@@ -66,8 +66,7 @@ class Todo {
   final String task;
   final String key;
   final List<Subtask> subtasks;
-  final DateTime createDate;
-  final DateTime endDate;
+  final DateTime todoDate;
   late final String status;
   final TagType tag;
   bool synced; // Added synced property
@@ -76,8 +75,7 @@ class Todo {
     required this.task,
     required this.key,
     required this.subtasks,
-    required this.createDate,
-    required this.endDate,
+    required this.todoDate,
     required this.status,
     required this.tag,
     this.synced = false,
@@ -88,8 +86,7 @@ class Todo {
       'task': task,
       'key': key,
       'subtasks': subtasks.map((subtask) => subtask.toMap()).toList(),
-      'createDate': createDate.toIso8601String(),
-      'endDate': endDate.toIso8601String(),
+      'todoDate': todoDate.toIso8601String(),
       'status': status,
       'tag': tag,
       'synced': synced, // Include synced property in the map
@@ -103,8 +100,7 @@ class Todo {
       subtasks: (map['subtasks'] as List)
           .map((data) => Subtask.fromMap(data))
           .toList(),
-      createDate: DateTime.parse(map['createDate'] as String),
-      endDate: DateTime.parse(map['endDate'] as String),
+      todoDate: DateTime.parse(map['todoDate'] as String),
       status: map['status'] as String,
       tag: map['tag'] as TagType,
       synced: map['synced'] as bool, // Extract synced property from the map

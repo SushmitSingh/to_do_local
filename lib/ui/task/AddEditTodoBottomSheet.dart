@@ -18,7 +18,7 @@ class AddEditTodoBottomSheet extends StatefulWidget {
 class _AddEditTodoBottomSheetState extends State<AddEditTodoBottomSheet> {
   final TextEditingController _tagTypeController = TextEditingController();
   String task = '';
-  DateTime createDate = DateTime.now();
+  DateTime todoDate = DateTime.now();
   DateTime endDate = DateTime.now();
   String status = 'pending';
   String selectedTag = 'personal';
@@ -39,8 +39,7 @@ class _AddEditTodoBottomSheetState extends State<AddEditTodoBottomSheet> {
     super.initState();
     if (widget.todo != null) {
       task = widget.todo!.task;
-      createDate = widget.todo!.createDate;
-      endDate = widget.todo!.endDate;
+      todoDate = widget.todo!.todoDate;
       status = widget.todo!.status;
       selectedTag = widget.todo!.tag.tagName;
       subtasks.addAll(widget.todo!.subtasks);
@@ -76,19 +75,19 @@ class _AddEditTodoBottomSheetState extends State<AddEditTodoBottomSheet> {
                 decoration: const InputDecoration(labelText: 'Task'),
               ),
               const SizedBox(height: 20),
-              Text('Create Date: ${createDate.toLocal()}'),
+              Text('Create Date: ${todoDate.toLocal()}'),
               ElevatedButton(
                 onPressed: () async {
                   final selectedDate = await showDatePicker(
                     context: context,
-                    initialDate: createDate,
+                    initialDate: todoDate,
                     firstDate: DateTime(2000),
                     lastDate: DateTime(2101),
                   );
 
-                  if (selectedDate != null && selectedDate != createDate) {
+                  if (selectedDate != null && selectedDate != todoDate) {
                     setState(() {
-                      createDate = selectedDate;
+                      todoDate = selectedDate;
                     });
                   }
                 },
@@ -222,8 +221,7 @@ class _AddEditTodoBottomSheetState extends State<AddEditTodoBottomSheet> {
       task: task,
       key: widget.todo?.key ?? DateTime.now().millisecondsSinceEpoch.toString(),
       subtasks: subtasks,
-      createDate: createDate,
-      endDate: endDate,
+      todoDate: todoDate,
       status: status,
       tag: TagType(tagName: selectedTag, icon: Icons.cabin),
     );

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart' as intl;
 import 'package:provider/provider.dart';
 
 import 'AddEditTodoBottomSheet.dart';
@@ -41,7 +42,7 @@ class _TodoListScreenState extends State<TodoListScreen> {
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.all(5),
+            padding: const EdgeInsets.all(5.0),
             child: SizedBox(
               height: 50,
               child: Consumer<TodoViewModel>(
@@ -57,7 +58,7 @@ class _TodoListScreenState extends State<TodoListScreen> {
                         ),
                         elevation: 1,
                         child: Padding(
-                          padding: const EdgeInsets.all(8.0),
+                          padding: const EdgeInsets.all(5.0),
                           child: Row(children: [
                             const Icon(Icons.tag),
                             Text(
@@ -80,7 +81,7 @@ class _TodoListScreenState extends State<TodoListScreen> {
             child: Consumer<TodoViewModel>(
               builder: (context, viewModel, child) {
                 return Padding(
-                  padding: const EdgeInsets.all(0),
+                  padding: const EdgeInsets.only(left: 5.0, right: 5.0),
                   child: ListView.builder(
                     itemCount: viewModel.todos.length,
                     itemBuilder: (context, index) {
@@ -89,15 +90,19 @@ class _TodoListScreenState extends State<TodoListScreen> {
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10)),
                         child: ExpansionTile(
+                          iconColor: Theme.of(context).primaryColor,
                           initiallyExpanded: false,
+                          backgroundColor:
+                              Theme.of(context).primaryColor.withAlpha(5),
+                          shape: const Border(),
                           title: Row(
                             children: [
                               Checkbox(
-                                visualDensity: VisualDensity.compact,
+                                visualDensity: const VisualDensity(
+                                    horizontal: -4.0, vertical: -4.0),
                                 checkColor: Colors.green,
                                 fillColor:
                                     MaterialStateProperty.resolveWith((states) {
-                                  // If the button is pressed, return green, otherwise blue
                                   if (states.contains(MaterialState.selected)) {
                                     return Colors.white;
                                   }
@@ -118,12 +123,15 @@ class _TodoListScreenState extends State<TodoListScreen> {
                                   style: TextStyle(
                                     overflow: TextOverflow.fade,
                                     fontWeight: FontWeight.normal,
-                                    fontSize: 18,
+                                    fontSize: 16,
                                     color: todo.status == 'completed'
-                                        ? Colors.green
+                                        ? Colors.green.shade600
                                         : todo.status == 'expired'
                                             ? Colors.red
-                                            : Colors.black,
+                                            : Theme.of(context)
+                                                .textTheme
+                                                .bodyMedium
+                                                ?.color,
                                     decoration: todo.status == 'completed'
                                         ? TextDecoration.lineThrough
                                         : TextDecoration.none,
@@ -144,6 +152,7 @@ class _TodoListScreenState extends State<TodoListScreen> {
                                       Checkbox(
                                         visualDensity: VisualDensity.compact,
                                         checkColor: Colors.green,
+                                        focusColor: Colors.grey,
                                         fillColor:
                                             MaterialStateProperty.resolveWith(
                                                 (states) {
@@ -171,8 +180,11 @@ class _TodoListScreenState extends State<TodoListScreen> {
                                             color: todo.subtasks[subtaskIndex]
                                                         .completed ==
                                                     true
-                                                ? Colors.green
-                                                : Colors.grey,
+                                                ? Colors.grey
+                                                : Theme.of(context)
+                                                    .textTheme
+                                                    .bodyMedium
+                                                    ?.color,
                                             decoration: todo
                                                         .subtasks[subtaskIndex]
                                                         .completed ==
@@ -184,26 +196,84 @@ class _TodoListScreenState extends State<TodoListScreen> {
                                       ),
                                     ],
                                   ),
-                                Row(
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  children: [
-                                    Flexible(
-                                      child: Text(
-                                          'Tag: ${"${todo.tag.tagName}\n"}Date: ${todo.createDate.day}-${todo.endDate.day}'),
-                                    ),
-                                    IconButton(
-                                      icon: Icon(Icons.edit),
-                                      onPressed: () {
-                                        _editTodo(context, todo);
-                                      },
-                                    ),
-                                    IconButton(
-                                      icon: Icon(Icons.delete),
-                                      onPressed: () {
-                                        _deleteTodo(context, todo);
-                                      },
-                                    )
-                                  ],
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Row(
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      Flexible(
+                                        child: Flexible(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Row(
+                                                children: [
+                                                  Padding(
+                                                    padding:
+                                                        const EdgeInsets.only(
+                                                            left: 5,
+                                                            right: 5,
+                                                            top: 2,
+                                                            bottom: 2),
+                                                    child: Icon(
+                                                        Icons.signpost_rounded,
+                                                        color: Theme.of(context)
+                                                            .primaryColor
+                                                            .withAlpha(100)),
+                                                  ),
+                                                  Text(
+                                                    todo.tag.tagName,
+                                                    style: const TextStyle(
+                                                        fontSize: 14,
+                                                        color: Colors.grey),
+                                                  ),
+                                                ],
+                                              ),
+                                              Row(
+                                                children: [
+                                                  Padding(
+                                                    padding:
+                                                        const EdgeInsets.only(
+                                                            left: 5,
+                                                            right: 5,
+                                                            top: 2,
+                                                            bottom: 2),
+                                                    child: Icon(
+                                                        Icons.access_time,
+                                                        color: Theme.of(context)
+                                                            .primaryColor
+                                                            .withAlpha(100)),
+                                                  ),
+                                                  Text(
+                                                    intl.DateFormat.yMMMEd()
+                                                        .format(todo.todoDate),
+                                                    style: const TextStyle(
+                                                        fontSize: 12,
+                                                        color: Colors.grey),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                      IconButton(
+                                        icon: Icon(Icons.edit,
+                                            color: Colors.green.withAlpha(200)),
+                                        onPressed: () {
+                                          _editTodo(context, todo);
+                                        },
+                                      ),
+                                      IconButton(
+                                        icon: Icon(Icons.delete,
+                                            color: Colors.red.withAlpha(200)),
+                                        onPressed: () {
+                                          _deleteTodo(context, todo);
+                                        },
+                                      )
+                                    ],
+                                  ),
                                 )
                               ],
                             ),
@@ -215,25 +285,7 @@ class _TodoListScreenState extends State<TodoListScreen> {
                 );
               },
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(15.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                FloatingActionButton(
-                  backgroundColor: Colors.white,
-                  elevation: 5.0,
-                  isExtended: true,
-                  onPressed: () {
-                    _showAddEditTodoBottomSheet(context, null);
-                  },
-                  child: Icon(
-                      color: Theme.of(context).primaryColor, Icons.add_task),
-                )
-              ],
-            ),
-          ),
+          )
         ],
       ),
     );
@@ -258,103 +310,6 @@ class _TodoListScreenState extends State<TodoListScreen> {
   Future<List<TagType>> _fetchAllTagTypes() async {
     final todoViewModel = Provider.of<TodoViewModel>(context, listen: false);
     return await todoViewModel.fetchTags();
-  }
-
-  void _showAddSubtaskDialog(
-    BuildContext context,
-    List<Subtask> subtasks,
-    Function setState,
-  ) {
-    String subtaskName = '';
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Add Subtask'),
-          content: TextField(
-            onChanged: (value) {
-              subtaskName = value;
-            },
-            decoration: const InputDecoration(labelText: 'Subtask'),
-          ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                setState(() {
-                  subtasks.add(Subtask(task: subtaskName, completed: false));
-                });
-                Navigator.of(context).pop();
-              },
-              child: const Text('Add Subtask'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  _showAddTagTypeDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Create New Tag'),
-          content: TextField(
-            controller: _tagTypeController, // Use a TextEditingController
-            decoration: InputDecoration(labelText: 'Tag Name'),
-          ),
-          actions: [
-            ElevatedButton(
-              onPressed: () {
-                final newTagType = TagType(
-                  tagName: _tagTypeController.text,
-                  icon: Icons
-                      .tag, // You can set a default icon or let the user choose
-                );
-
-                // Call the ViewModel to add the new tag type
-                Provider.of<TodoViewModel>(context, listen: false)
-                    .addTagType(newTagType);
-
-                Navigator.pop(context);
-              },
-              child: Text('Create'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _saveTodoLocal(
-    BuildContext context,
-    String task,
-    DateTime createDate,
-    DateTime endDate,
-    String status,
-    String tag,
-    List<Subtask> subtasks,
-  ) {
-    final todoViewModel = Provider.of<TodoViewModel>(context, listen: false);
-
-    final newTodo = Todo(
-      task: task,
-      key: DateTime.now().millisecondsSinceEpoch.toString(),
-      subtasks: subtasks,
-      createDate: createDate,
-      endDate: endDate,
-      status: status,
-      tag: TagType(tagName: tag, icon: Icons.cabin),
-    );
-
-    todoViewModel.addTodo(newTodo);
   }
 
   void _editTodo(BuildContext context, Todo todo) {

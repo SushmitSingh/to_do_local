@@ -54,8 +54,7 @@ class TodoViewModel extends ChangeNotifier {
         task: todo.task,
         key: todo.key,
         subtasks: completedSubtasks,
-        createDate: todo.createDate,
-        endDate: todo.endDate,
+        todoDate: todo.todoDate,
         status: 'completed',
         tag: todo.tag,
       );
@@ -89,8 +88,7 @@ class TodoViewModel extends ChangeNotifier {
         task: todo.task,
         key: todo.key,
         subtasks: todo.subtasks,
-        createDate: todo.createDate,
-        endDate: todo.endDate,
+        todoDate: todo.todoDate,
         status: newStatus,
         tag: todo.tag,
       );
