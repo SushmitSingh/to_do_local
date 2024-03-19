@@ -19,7 +19,6 @@ class _AddEditTodoBottomSheetState extends State<AddEditTodoBottomSheet> {
   final TextEditingController _tagTypeController = TextEditingController();
   String task = '';
   DateTime todoDate = DateTime.now();
-  DateTime endDate = DateTime.now();
   String status = 'pending';
   String selectedTag = 'personal';
   List<Subtask> subtasks = [];
@@ -49,7 +48,7 @@ class _AddEditTodoBottomSheetState extends State<AddEditTodoBottomSheet> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: true,
+      resizeToAvoidBottomInset: false,
       body: SingleChildScrollView(
         child: Container(
           margin:
@@ -94,21 +93,13 @@ class _AddEditTodoBottomSheetState extends State<AddEditTodoBottomSheet> {
                 child: const Text('Select Create Date'),
               ),
               const SizedBox(height: 20),
-              Text('End Date: ${endDate.toLocal()}'),
               ElevatedButton(
                 onPressed: () async {
                   final selectedDate = await showDatePicker(
                     context: context,
-                    initialDate: endDate,
                     firstDate: DateTime(2000),
                     lastDate: DateTime(2101),
                   );
-
-                  if (selectedDate != null && selectedDate != endDate) {
-                    setState(() {
-                      endDate = selectedDate;
-                    });
-                  }
                 },
                 child: const Text('Select End Date'),
               ),
@@ -121,8 +112,7 @@ class _AddEditTodoBottomSheetState extends State<AddEditTodoBottomSheet> {
                     status = value!;
                   });
                 },
-                items:
-                    ['pending', 'completed', 'expire', 'other'].map((status) {
+                items: ['pending', 'completed', 'other'].map((status) {
                   return DropdownMenuItem<String>(
                     value: status,
                     child: Text(status),
@@ -144,9 +134,6 @@ class _AddEditTodoBottomSheetState extends State<AddEditTodoBottomSheet> {
                       onChanged: (value) {
                         setState(() {
                           selectedTag = value!;
-                          if (selectedTag == 'createNewTag') {
-                            _showAddTagTypeDialog(context);
-                          }
                         });
                       },
                       items: [
@@ -161,10 +148,6 @@ class _AddEditTodoBottomSheetState extends State<AddEditTodoBottomSheet> {
                             value: selectedTag,
                             child: Text(selectedTag),
                           ),
-                        const DropdownMenuItem<String>(
-                          value: 'createNewTag',
-                          child: Text('Create New Tag'),
-                        ),
                       ],
                     );
                   } else if (snapshot.hasError) {
@@ -265,37 +248,6 @@ class _AddEditTodoBottomSheetState extends State<AddEditTodoBottomSheet> {
                 Navigator.of(context).pop();
               },
               child: const Text('Add Subtask'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _showAddTagTypeDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Create New Tag'),
-          content: TextField(
-            controller: _tagTypeController,
-            decoration: const InputDecoration(labelText: 'Tag Name'),
-          ),
-          actions: [
-            ElevatedButton(
-              onPressed: () {
-                final newTagType = TagType(
-                  tagName: _tagTypeController.text,
-                  icon: Icons.tag,
-                );
-
-                Provider.of<TodoViewModel>(context, listen: false)
-                    .addTagType(newTagType);
-
-                Navigator.pop(context);
-              },
-              child: const Text('Create'),
             ),
           ],
         );

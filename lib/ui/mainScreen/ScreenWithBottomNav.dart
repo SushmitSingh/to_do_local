@@ -62,11 +62,11 @@ class _ScreenWithBottomNavState extends State<ScreenWithBottomNav> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButtonLocation: FloatingActionButtonLocation.miniEndFloat,
+      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.white,
         elevation: 5.0,
-        isExtended: true,
+        isExtended: false,
         onPressed: () {
           _showAddEditTodoBottomSheet(context, null);
         },
@@ -108,9 +108,10 @@ class _ScreenWithBottomNavState extends State<ScreenWithBottomNav> {
             label: 'Calendar',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
+              icon: Icon(
+            Icons.add,
+            color: Colors.transparent,
+          )),
         ],
         selectedFontSize: 14,
         selectedItemColor: Theme.of(context).primaryColor,

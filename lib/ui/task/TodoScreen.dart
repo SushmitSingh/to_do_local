@@ -52,23 +52,30 @@ class _TodoListScreenState extends State<TodoListScreen> {
                     itemCount: viewModel.tags.length,
                     itemBuilder: (context, index) {
                       final tag = viewModel.tags[index];
-                      return Card(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10.0),
-                        ),
-                        elevation: 1,
-                        child: Padding(
-                          padding: const EdgeInsets.all(5.0),
-                          child: Row(children: [
-                            const Icon(Icons.tag),
-                            Text(
-                              tag.tagName,
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                fontSize: 14,
-                              ),
-                            )
-                          ]),
+                      return GestureDetector(
+                        onTap: () {
+                          viewModel.setSelectedTag(tag);
+                        },
+                        child: Card(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10.0),
+                          ),
+                          elevation: 1,
+                          child: Padding(
+                            padding: const EdgeInsets.all(5.0),
+                            child: Row(
+                              children: [
+                                Icon(tag.icon),
+                                Text(
+                                  tag.tagName,
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                  ),
+                                )
+                              ],
+                            ),
+                          ),
                         ),
                       );
                     },

@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 
 import '../TodoRepository.dart';
 import '../model/Todo.dart';
@@ -11,7 +11,17 @@ class TodoViewModel extends ChangeNotifier {
   List<Todo> get todos => _todos;
 
   List<TagType> _tags = [];
+
   List<TagType> get tags => _tags;
+
+  void setSelectedTag(TagType? tag) {
+    if (tag?.tagName == "all") {
+      _fetchTodos();
+    } else {
+      fetchTodosByTag(tag!.tagName);
+    }
+    notifyListeners();
+  }
 
   Future<void> _fetchTodos() async {
     try {
@@ -26,6 +36,8 @@ class TodoViewModel extends ChangeNotifier {
     try {
       _tags = await _repository.getAllTags();
       print(tags.toString() + "hiii");
+      _tags.add(TagType(tagName: "all", icon: Icons.select_all));
+      _tags.add(TagType(tagName: "personal", icon: Icons.perm_identity_sharp));
       return _tags;
     } catch (error) {
       print('Error fetching tags $error');
