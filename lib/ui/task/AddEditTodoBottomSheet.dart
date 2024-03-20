@@ -20,10 +20,8 @@ class _AddEditTodoBottomSheetState extends State<AddEditTodoBottomSheet> {
   String task = '';
   DateTime todoDate = DateTime.now();
   String status = 'pending';
-  String selectedTag = 'personal';
+  late String selectedTag;
   List<Subtask> subtasks = [];
-
-  Todo? _updatedTodo;
 
   String get _todoTitle {
     if (widget.todo != null) {
@@ -42,6 +40,8 @@ class _AddEditTodoBottomSheetState extends State<AddEditTodoBottomSheet> {
       status = widget.todo!.status;
       selectedTag = widget.todo!.tag.tagName;
       subtasks.addAll(widget.todo!.subtasks);
+    } else {
+      selectedTag = "Select A Tag";
     }
   }
 
@@ -73,8 +73,118 @@ class _AddEditTodoBottomSheetState extends State<AddEditTodoBottomSheet> {
                 },
                 decoration: const InputDecoration(labelText: 'Task'),
               ),
+              Wrap(
+                spacing: 8.0,
+                runSpacing: 4.0,
+                children: [
+                  ...subtasks.map((subtask) {
+                    return Chip(
+                      label: Text(subtask.task),
+                      onDeleted: () {
+                        setState(() {
+                          subtasks.remove(subtask);
+                        });
+                      },
+                    );
+                  }).toList(),
+                  Chip(
+                    color: MaterialStateProperty.resolveWith((states) {
+                      if (states.contains(MaterialState.pressed)) {
+                        return Colors.green;
+                      }
+                      return Colors.blue;
+                    }),
+                    deleteIcon: Icon(Icons.add),
+                    label: Text("Add"),
+                    onDeleted: () {
+                      setState(() {
+                        _showAddSubtaskDialog(context);
+                      });
+                    },
+                  ),
+                ],
+              ),
               const SizedBox(height: 20),
-              Text('Create Date: ${todoDate.toLocal()}'),
+              Row(
+                children: [
+                  Container(
+                    width: MediaQuery.of(context).size.width * 0.4,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        const Text('Status'),
+                        DropdownButton<String>(
+                          value: status,
+                          onChanged: (value) {
+                            setState(() {
+                              status = value!;
+                            });
+                          },
+                          items:
+                              ['pending', 'completed', 'other'].map((status) {
+                            return DropdownMenuItem<String>(
+                              value: status,
+                              child: Text(status),
+                            );
+                          }).toList(),
+                        ),
+                        const SizedBox(height: 20),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(
+                    width: 4,
+                  ),
+                  Container(
+                    width: MediaQuery.of(context).size.width * 0.4,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        const Text('Tag'),
+                        FutureBuilder<List<TagType>>(
+                          future: _fetchAllTagTypes(context),
+                          builder: (context, snapshot) {
+                            if (snapshot.hasData) {
+                              List<String> tagTypeNames = snapshot.data!
+                                  .map((tagType) => tagType.tagName)
+                                  .toList();
+
+                              return DropdownButton<String>(
+                                value: selectedTag,
+                                onChanged: (value) {
+                                  setState(() {
+                                    selectedTag = value!;
+                                  });
+                                },
+                                items: [
+                                  ...tagTypeNames.map((tagName) {
+                                    return DropdownMenuItem<String>(
+                                      value: tagName,
+                                      child: Text(tagName),
+                                    );
+                                  }),
+                                  if (!tagTypeNames.contains(selectedTag))
+                                    DropdownMenuItem<String>(
+                                      value: selectedTag,
+                                      child: Text(selectedTag),
+                                    ),
+                                ],
+                              );
+                            } else if (snapshot.hasError) {
+                              return const Text('Error loading tag types');
+                            } else {
+                              return const CircularProgressIndicator();
+                            }
+                          },
+                        ),
+                        const SizedBox(height: 20),
+                      ],
+                    ),
+                  )
+                ],
+              ),
+              const SizedBox(height: 20),
+              Text('Remind Date: ${todoDate.toLocal()}'),
               ElevatedButton(
                 onPressed: () async {
                   final selectedDate = await showDatePicker(
@@ -90,94 +200,7 @@ class _AddEditTodoBottomSheetState extends State<AddEditTodoBottomSheet> {
                     });
                   }
                 },
-                child: const Text('Select Create Date'),
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () async {
-                  final selectedDate = await showDatePicker(
-                    context: context,
-                    firstDate: DateTime(2000),
-                    lastDate: DateTime(2101),
-                  );
-                },
-                child: const Text('Select End Date'),
-              ),
-              const SizedBox(height: 20),
-              const Text('Status'),
-              DropdownButton<String>(
-                value: status,
-                onChanged: (value) {
-                  setState(() {
-                    status = value!;
-                  });
-                },
-                items: ['pending', 'completed', 'other'].map((status) {
-                  return DropdownMenuItem<String>(
-                    value: status,
-                    child: Text(status),
-                  );
-                }).toList(),
-              ),
-              const SizedBox(height: 20),
-              const Text('Tag'),
-              FutureBuilder<List<TagType>>(
-                future: _fetchAllTagTypes(context),
-                builder: (context, snapshot) {
-                  if (snapshot.hasData) {
-                    List<String> tagTypeNames = snapshot.data!
-                        .map((tagType) => tagType.tagName)
-                        .toList();
-
-                    return DropdownButton<String>(
-                      value: selectedTag,
-                      onChanged: (value) {
-                        setState(() {
-                          selectedTag = value!;
-                        });
-                      },
-                      items: [
-                        ...tagTypeNames.map((tagName) {
-                          return DropdownMenuItem<String>(
-                            value: tagName,
-                            child: Text(tagName),
-                          );
-                        }),
-                        if (!tagTypeNames.contains(selectedTag))
-                          DropdownMenuItem<String>(
-                            value: selectedTag,
-                            child: Text(selectedTag),
-                          ),
-                      ],
-                    );
-                  } else if (snapshot.hasError) {
-                    return const Text('Error loading tag types');
-                  } else {
-                    return const CircularProgressIndicator();
-                  }
-                },
-              ),
-              const SizedBox(height: 20),
-              Wrap(
-                spacing: 8.0,
-                runSpacing: 4.0,
-                children: subtasks.map((subtask) {
-                  return Chip(
-                    label: Text(subtask.task),
-                    onDeleted: () {
-                      setState(() {
-                        subtasks.remove(subtask);
-                      });
-                    },
-                  );
-                }).toList(),
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  _showAddSubtaskDialog(context);
-                },
-                child: const Text('Add Subtask'),
+                child: const Text('Select Remind Date'),
               ),
               const SizedBox(height: 20),
               ElevatedButton(

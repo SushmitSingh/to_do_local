@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sembast/sembast.dart';
 import 'package:sembast/sembast_io.dart';
@@ -7,8 +6,6 @@ import '../ui/task/model/Todo.dart';
 
 class DatabaseProvider {
   final String _todosStoreName = 'todos';
-  final String _subtasksStoreName = 'subtasks';
-  final String _tagsStoreName = 'tags'; // New store for TagType
   final DatabaseFactory _dbFactory = databaseFactoryIo;
   late Database _database;
 
@@ -52,22 +49,26 @@ class DatabaseProvider {
   Future<List<TagType>> getAllTagTypes() async {
     await _initializeDatabase();
 
-    final store = intMapStoreFactory.store(_tagsStoreName);
+    final store = intMapStoreFactory.store(_todosStoreName);
     final tagSnapshots = await store.find(_database);
 
     await _database.close();
 
-    return tagSnapshots.map((snapshot) {
+    // Use a Set to store unique TagType objects
+    final tagSet = <String, TagType>{};
+
+    tagSnapshots.forEach((snapshot) {
       final Map<String, dynamic>? tagData =
           snapshot['tag'] as Map<String, dynamic>?;
 
-      // Deserialize TagType object
-      final TagType tag = tagData != null
-          ? TagType.fromMap(tagData)
-          : TagType(tagName: '', icon: Icons.error);
+      if (tagData != null) {
+        final tag = TagType.fromMap(tagData);
+        tagSet[tag.tagName] = tag;
+      }
+    });
 
-      return tag;
-    }).toList();
+    // Convert the Set to a List and return
+    return tagSet.values.toList();
   }
 
   Future<List<Todo>> getTodosByTagName(String selectedTag) async {
@@ -179,7 +180,7 @@ class DatabaseProvider {
   Future<void> addTagType(TagType tagType) async {
     await _initializeDatabase();
 
-    final store = intMapStoreFactory.store(_tagsStoreName);
+    final store = intMapStoreFactory.store(_todosStoreName);
     await store.add(_database, {'tag': tagType.toMap()});
 
     // Ensure the database is closed after the operation

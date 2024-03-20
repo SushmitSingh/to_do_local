@@ -14,7 +14,12 @@ class TodoViewModel extends ChangeNotifier {
 
   List<TagType> get tags => _tags;
 
+  TagType? _selectedTag;
+
+  TagType? get selectedTag => _selectedTag;
+
   void setSelectedTag(TagType? tag) {
+    _selectedTag = tag;
     if (tag?.tagName == "all") {
       _fetchTodos();
     } else {
@@ -36,8 +41,6 @@ class TodoViewModel extends ChangeNotifier {
     try {
       _tags = await _repository.getAllTags();
       print(tags.toString() + "hiii");
-      _tags.add(TagType(tagName: "all", icon: Icons.select_all));
-      _tags.add(TagType(tagName: "personal", icon: Icons.perm_identity_sharp));
       return _tags;
     } catch (error) {
       print('Error fetching tags $error');

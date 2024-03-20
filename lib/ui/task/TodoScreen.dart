@@ -49,35 +49,106 @@ class _TodoListScreenState extends State<TodoListScreen> {
                 builder: (context, viewModel, child) {
                   return ListView.builder(
                     scrollDirection: Axis.horizontal,
-                    itemCount: viewModel.tags.length,
+                    itemCount: viewModel.tags.length +
+                        2, // Add 2 for the "Add Tag" chips
                     itemBuilder: (context, index) {
-                      final tag = viewModel.tags[index];
-                      return GestureDetector(
-                        onTap: () {
-                          viewModel.setSelectedTag(tag);
-                        },
-                        child: Card(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10.0),
-                          ),
-                          elevation: 1,
-                          child: Padding(
-                            padding: const EdgeInsets.all(5.0),
-                            child: Row(
-                              children: [
-                                Icon(tag.icon),
-                                Text(
-                                  tag.tagName,
-                                  textAlign: TextAlign.center,
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                  ),
-                                )
-                              ],
+                      if (index == 0) {
+                        var isSelected =
+                            viewModel.selectedTag?.tagName == "all";
+                        return GestureDetector(
+                          onTap: () {
+                            viewModel.setSelectedTag(TagType(
+                              tagName: "all",
+                              icon: Icons.all_inbox,
+                            ));
+                          },
+                          child: Card(
+                            color: isSelected
+                                ? Theme.of(context).primaryColor
+                                : null,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10.0),
+                            ),
+                            elevation: 1,
+                            child: const Padding(
+                              padding: EdgeInsets.all(5.0),
+                              child: Row(
+                                children: [
+                                  Icon(Icons.all_inbox),
+                                  Text(
+                                    "All",
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                    ),
+                                  )
+                                ],
+                              ),
                             ),
                           ),
-                        ),
-                      );
+                        );
+                      } else if (index <= viewModel.tags.length) {
+                        final tag = viewModel.tags[index - 1];
+                        final isSelected = viewModel.selectedTag == tag;
+                        return GestureDetector(
+                          onTap: () {
+                            viewModel.setSelectedTag(tag);
+                          },
+                          child: Card(
+                            color: isSelected
+                                ? Theme.of(context).primaryColor
+                                : null,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10.0),
+                            ),
+                            elevation: 1,
+                            child: Padding(
+                              padding: const EdgeInsets.all(5.0),
+                              child: Row(
+                                children: [
+                                  Icon(tag.icon),
+                                  Text(
+                                    tag.tagName,
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      } else {
+                        return GestureDetector(
+                          onTap: () {
+                            _showAddTagTypeDialog(context);
+                          },
+                          child: Card(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10.0),
+                            ),
+                            elevation: 1,
+                            child: const Padding(
+                              padding: EdgeInsets.all(5.0),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.add,
+                                    color: Colors.green,
+                                  ),
+                                  Text(
+                                    "Add Tag",
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                        fontSize: 14, color: Colors.green),
+                                  )
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      }
                     },
                   );
                 },
@@ -356,5 +427,36 @@ class _TodoListScreenState extends State<TodoListScreen> {
   void dispose() {
     _tagTypeController.dispose();
     super.dispose();
+  }
+
+  void _showAddTagTypeDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Create New Tag'),
+          content: TextField(
+            controller: _tagTypeController,
+            decoration: const InputDecoration(labelText: 'Tag Name'),
+          ),
+          actions: [
+            ElevatedButton(
+              onPressed: () {
+                final newTagType = TagType(
+                  tagName: _tagTypeController.text,
+                  icon: Icons.tag,
+                );
+
+                Provider.of<TodoViewModel>(context, listen: false)
+                    .addTagType(newTagType);
+
+                Navigator.pop(context);
+              },
+              child: const Text('Create'),
+            ),
+          ],
+        );
+      },
+    );
   }
 }
