@@ -164,6 +164,7 @@ class _TodoListScreenState extends State<TodoListScreen> {
                     itemCount: viewModel.todos.length,
                     itemBuilder: (context, index) {
                       final todo = viewModel.todos[index];
+                      final id = todo.id;
                       return Card(
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10)),
@@ -246,8 +247,7 @@ class _TodoListScreenState extends State<TodoListScreen> {
                                         onChanged: (value) {
                                           todo.subtasks[subtaskIndex]
                                               .completed = value ?? false;
-                                          viewModel.updateTodo(todo,
-                                              todo.subtasks[subtaskIndex]);
+                                          viewModel.updateTodo(id!, todo);
                                         },
                                       ),
                                       Text.rich(

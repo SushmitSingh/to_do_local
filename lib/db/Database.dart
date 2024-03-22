@@ -1,6 +1,7 @@
 import 'package:path_provider/path_provider.dart';
 import 'package:sembast/sembast.dart';
 import 'package:sembast/sembast_io.dart';
+import 'package:sembast/timestamp.dart';
 
 import '../ui/task/model/Todo.dart';
 
@@ -23,27 +24,39 @@ class DatabaseProvider {
     final finder = Finder(sortOrders: [SortOrder('todoDate')]);
     final todosSnapshots = await store.find(_database, finder: finder);
 
-    // Ensure the database is closed after fetching data
-    await _database.close();
-
-    return todosSnapshots.map((snapshot) {
+    final todos = todosSnapshots.map((snapshot) {
       final List<dynamic>? subtasksData =
           snapshot['subtasks'] as List<dynamic>?;
 
-      // Ensure subtasksData is not null before using it
+      final Map<String, dynamic> tagData =
+          snapshot['tag'] as Map<String, dynamic>;
+      final TagType tag = TagType.fromJson(tagData);
+
       final List<Subtask> subtasks = (subtasksData ?? []).map((data) {
-        // Handle null values in subtask data
         return Subtask.fromMap(data as Map<String, dynamic>);
       }).toList();
 
+      // Check if 'todoDate' is null or not a Timestamp
+      final todoDate = snapshot['todoDate'] != null &&
+              snapshot['todoDate'] is Timestamp
+          ? (snapshot['todoDate'] as Timestamp).toDateTime()
+          : DateTime
+              .now(); // Provide a default value if 'todoDate' is null or not a Timestamp
+
       return Todo(
-          task: snapshot['task'] as String? ?? "",
-          key: snapshot['key'] as String? ?? "",
-          subtasks: subtasks,
-          todoDate: DateTime.parse(snapshot['todoDate'] as String? ?? ""),
-          status: snapshot['status'] as String? ?? "",
-          tag: TagType.fromMap(snapshot['tag'] as Map<String, dynamic>?));
+        task: snapshot['task'] as String? ?? "",
+        key: snapshot['key'] as String? ?? "",
+        subtasks: subtasks,
+        todoDate: todoDate,
+        status: snapshot['status'] as String? ?? "",
+        tag: tag,
+      );
     }).toList();
+
+    // Close the database after fetching data
+    await _database.close();
+
+    return todos;
   }
 
   Future<List<TagType>> getAllTagTypes() async {
@@ -112,7 +125,6 @@ class DatabaseProvider {
     final finder = Finder(
       filter: Filter.or([
         Filter.equals('todoDate', selectedDateTime.toIso8601String()),
-        Filter.equals('endDate', selectedDateTime.toIso8601String()),
         Filter.and([
           Filter.greaterThanOrEquals(
               'todoDate', selectedDateTime.toIso8601String()),
@@ -142,7 +154,7 @@ class DatabaseProvider {
     }).toList();
   }
 
-  Future<void> addTodo(Todo todo) async {
+/*  Future<void> addTodo(Todo todo) async {
     await _initializeDatabase();
 
     final store = intMapStoreFactory.store(_todosStoreName);
@@ -157,13 +169,30 @@ class DatabaseProvider {
 
     // Ensure the database is closed after the operation
     await _database.close();
-  }
+  }*/
 
-  Future<void> updateTodo(Todo updatedTodo) async {
+/*  Future<void> updateTodo(Todo updatedTodo) async {
     await _initializeDatabase();
 
     final store = intMapStoreFactory.store(_todosStoreName);
     final finder = Finder(filter: Filter.equals('key', updatedTodo.key));
+    final snapshot = await store.findFirst(_database, finder: finder);
+
+    if (snapshot != null) {
+      await store.record(snapshot.key).update(_database, {
+        ...updatedTodo.toMap(),
+        'tag': updatedTodo.tag.toJson(), // Convert TagType to JSON
+      });
+    }
+
+    // Ensure the database is closed after the operation
+    await _database.close();
+  }*/
+  Future<void> updateTodo(int id, Todo updatedTodo) async {
+    await _initializeDatabase();
+
+    final store = intMapStoreFactory.store(_todosStoreName);
+    final finder = Finder(filter: Filter.equals('id', id));
     final snapshot = await store.findFirst(_database, finder: finder);
 
     if (snapshot != null) {
@@ -181,7 +210,31 @@ class DatabaseProvider {
     await _initializeDatabase();
 
     final store = intMapStoreFactory.store(_todosStoreName);
-    await store.add(_database, {'tag': tagType.toMap()});
+    final finder = Finder(filter: Filter.equals('tagName', tagType.tagName));
+    final existingTag = await store.findFirst(_database, finder: finder);
+
+    if (existingTag == null) {
+      final newTagId = await store.add(_database, tagType.toMap());
+      tagType.id = newTagId;
+    }
+
+    // Ensure the database is closed after the operation
+    await _database.close();
+  }
+
+  Future<void> addTodo(Todo todo) async {
+    await _initializeDatabase();
+
+    final store = intMapStoreFactory.store(_todosStoreName);
+    final finder = Finder(filter: Filter.equals('key', todo.key));
+    final snapshot = await store.findFirst(_database, finder: finder);
+
+    if (snapshot == null) {
+      final newTodoId = await store.add(_database, todo.toMap());
+      todo.id = newTodoId;
+    } else {
+      await store.record(snapshot.key).update(_database, todo.toMap());
+    }
 
     // Ensure the database is closed after the operation
     await _database.close();
@@ -199,18 +252,5 @@ class DatabaseProvider {
     }
 
     await _database.close();
-  }
-
-  Map<String, dynamic> _todoToMap(Todo todo) {
-    return {
-      'task': todo.task,
-      'key': todo.key,
-      'subtasks': todo.subtasks.map((subtask) => subtask.toMap()).toList(),
-      'todoDate': todo.todoDate.toIso8601String(),
-      'status': todo.status,
-      'tag':
-          todo.tag.toJson(), // Convert TagType to a format suitable for storage
-      'synced': todo.synced,
-    };
   }
 }

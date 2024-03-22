@@ -20,8 +20,9 @@ class _AddEditTodoBottomSheetState extends State<AddEditTodoBottomSheet> {
   String task = '';
   DateTime todoDate = DateTime.now();
   String status = 'pending';
-  late String selectedTag;
+  late TagType selectedTag;
   List<Subtask> subtasks = [];
+  late int id;
 
   String get _todoTitle {
     if (widget.todo != null) {
@@ -35,13 +36,18 @@ class _AddEditTodoBottomSheetState extends State<AddEditTodoBottomSheet> {
   void initState() {
     super.initState();
     if (widget.todo != null) {
+      id = widget.todo!.id!;
       task = widget.todo!.task;
       todoDate = widget.todo!.todoDate;
       status = widget.todo!.status;
-      selectedTag = widget.todo!.tag.tagName;
+      selectedTag = TagType(
+          tagName: widget.todo!.tag.tagName, icon: widget.todo!.tag.icon);
       subtasks.addAll(widget.todo!.subtasks);
     } else {
-      selectedTag = "Select A Tag";
+      selectedTag = TagType(
+        tagName: "Select A Tag",
+        icon: Icons.add,
+      );
     }
   }
 
@@ -145,11 +151,11 @@ class _AddEditTodoBottomSheetState extends State<AddEditTodoBottomSheet> {
                           future: _fetchAllTagTypes(context),
                           builder: (context, snapshot) {
                             if (snapshot.hasData) {
-                              List<String> tagTypeNames = snapshot.data!
-                                  .map((tagType) => tagType.tagName)
+                              List<TagType> tagTypeNames = snapshot.data!
+                                  .map((tagType) => tagType)
                                   .toList();
 
-                              return DropdownButton<String>(
+                              return DropdownButton<TagType>(
                                 value: selectedTag,
                                 onChanged: (value) {
                                   setState(() {
@@ -157,16 +163,16 @@ class _AddEditTodoBottomSheetState extends State<AddEditTodoBottomSheet> {
                                   });
                                 },
                                 items: [
-                                  ...tagTypeNames.map((tagName) {
-                                    return DropdownMenuItem<String>(
-                                      value: tagName,
-                                      child: Text(tagName),
+                                  ...tagTypeNames.map((tagType) {
+                                    return DropdownMenuItem<TagType>(
+                                      value: tagType,
+                                      child: Text(tagType.tagName),
                                     );
                                   }),
                                   if (!tagTypeNames.contains(selectedTag))
-                                    DropdownMenuItem<String>(
+                                    DropdownMenuItem<TagType>(
                                       value: selectedTag,
-                                      child: Text(selectedTag),
+                                      child: Text(selectedTag.tagName),
                                     ),
                                 ],
                               );
@@ -229,14 +235,15 @@ class _AddEditTodoBottomSheetState extends State<AddEditTodoBottomSheet> {
       subtasks: subtasks,
       todoDate: todoDate,
       status: status,
-      tag: TagType(tagName: selectedTag, icon: Icons.cabin),
+      tag: TagType(tagName: selectedTag.tagName, icon: selectedTag.icon),
     );
 
     widget.onUpdateTodo(newTodo);
     final todoViewModel = Provider.of<TodoViewModel>(context, listen: false);
 
     if (_todoTitle == "Create New") {
-      todoViewModel.updateTodo(newTodo, newTodo.subtasks as Subtask);
+      // Assuming `id` is the index of the subtask you want to update
+      todoViewModel.updateTodo(id, newTodo);
     } else {
       todoViewModel.addTodo(newTodo);
     }

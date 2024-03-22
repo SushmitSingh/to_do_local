@@ -88,7 +88,7 @@ class TodoViewModel extends ChangeNotifier {
       // Mark synced todos as synced
       for (var syncedTodo in unsyncedTodos) {
         syncedTodo.synced = true;
-        await _repository.updateTodo(syncedTodo);
+        //await _repository.updateTodo(syncedTodo);
       }
       await _fetchTodos(); // Refresh the local list after syncing
     } catch (error) {
@@ -115,23 +115,15 @@ class TodoViewModel extends ChangeNotifier {
     }
   }
 
-  Future<void> updateTodo(Todo todo, Subtask subtask) async {
+  Future<void> updateTodo(int id, Todo todo) async {
     try {
-      // Find the index of the subtask in the todo's subtasks list
-      int subtaskIndex = todo.subtasks.indexOf(subtask);
+      // Update the todo in the database
+      await _repository.updateTodo(id, todo);
 
-      if (subtaskIndex != -1) {
-        // Update the status of the subtask
-        todo.subtasks[subtaskIndex].completed = subtask.completed;
-
-        // Update the todo in the database
-        await _repository.updateTodo(todo);
-
-        // Notify listeners to update the UI
-        notifyListeners();
-      }
+      // Notify listeners to update the UI
+      notifyListeners();
     } catch (error) {
-      print('Error updating subtask status: $error');
+      print('Error updating todo: $error');
     }
   }
 
@@ -156,10 +148,13 @@ class TodoViewModel extends ChangeNotifier {
   Future<void> addTagType(TagType tagType) async {
     await _repository.addTagType(tagType);
     await fetchTags();
+    notifyListeners();
   }
 
   void deleteTodo(Todo todo) async {
     await _repository.deleteTodo(todo);
     await fetchTags();
+    await _fetchTodos();
+    notifyListeners();
   }
 }
