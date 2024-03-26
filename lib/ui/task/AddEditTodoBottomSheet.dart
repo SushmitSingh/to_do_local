@@ -45,7 +45,7 @@ class _AddEditTodoBottomSheetState extends State<AddEditTodoBottomSheet> {
       subtasks.addAll(widget.todo!.subtasks);
     } else {
       selectedTag = TagType(
-        tagName: "Select A Tag",
+        tagName: "Regular",
         icon: Icons.add,
       );
     }
@@ -67,7 +67,7 @@ class _AddEditTodoBottomSheetState extends State<AddEditTodoBottomSheet> {
                 _todoTitle,
                 textAlign: TextAlign.center,
                 style: const TextStyle(
-                  fontSize: 16,
+                  fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -79,6 +79,8 @@ class _AddEditTodoBottomSheetState extends State<AddEditTodoBottomSheet> {
                 },
                 decoration: const InputDecoration(labelText: 'Task'),
               ),
+              const SizedBox(height: 20),
+              const Text("Subtask"),
               Wrap(
                 spacing: 8.0,
                 runSpacing: 4.0,
@@ -94,14 +96,11 @@ class _AddEditTodoBottomSheetState extends State<AddEditTodoBottomSheet> {
                     );
                   }).toList(),
                   Chip(
-                    color: MaterialStateProperty.resolveWith((states) {
-                      if (states.contains(MaterialState.pressed)) {
-                        return Colors.green;
-                      }
-                      return Colors.blue;
-                    }),
-                    deleteIcon: Icon(Icons.add),
-                    label: Text("Add"),
+                    deleteIcon: const Icon(
+                      Icons.add,
+                      color: Colors.green,
+                    ),
+                    label: const Text("Add"),
                     onDeleted: () {
                       setState(() {
                         _showAddSubtaskDialog(context);
@@ -192,30 +191,34 @@ class _AddEditTodoBottomSheetState extends State<AddEditTodoBottomSheet> {
               const SizedBox(height: 20),
               Text('Remind Date: ${todoDate.toLocal()}'),
               ElevatedButton(
-                onPressed: () async {
-                  final selectedDate = await showDatePicker(
-                    context: context,
-                    initialDate: todoDate,
-                    firstDate: DateTime(2000),
-                    lastDate: DateTime(2101),
-                  );
+                  onPressed: () async {
+                    final selectedDate = await showDatePicker(
+                      context: context,
+                      initialDate: todoDate,
+                      firstDate: DateTime(2000),
+                      lastDate: DateTime(2101),
+                    );
 
-                  if (selectedDate != null && selectedDate != todoDate) {
-                    setState(() {
-                      todoDate = selectedDate;
-                    });
-                  }
-                },
-                child: const Text('Select Remind Date'),
-              ),
+                    if (selectedDate != null && selectedDate != todoDate) {
+                      setState(() {
+                        todoDate = selectedDate;
+                      });
+                    }
+                  },
+                  child: Text(
+                    'Select Remind Date',
+                    style: TextStyle(color: Theme.of(context).primaryColor),
+                  )),
               const SizedBox(height: 20),
               ElevatedButton(
-                onPressed: () {
-                  _saveTodo();
-                  Navigator.of(context).pop();
-                },
-                child: const Text('Save Locally'),
-              ),
+                  onPressed: () {
+                    _saveTodo();
+                    Navigator.of(context).pop();
+                  },
+                  child: Text(
+                    'Save Locally',
+                    style: TextStyle(color: Theme.of(context).primaryColor),
+                  )),
             ],
           ),
         ),
@@ -241,7 +244,7 @@ class _AddEditTodoBottomSheetState extends State<AddEditTodoBottomSheet> {
     widget.onUpdateTodo(newTodo);
     final todoViewModel = Provider.of<TodoViewModel>(context, listen: false);
 
-    if (_todoTitle == "Create New") {
+    if (_todoTitle != "Create New") {
       // Assuming `id` is the index of the subtask you want to update
       todoViewModel.updateTodo(id, newTodo);
     } else {
@@ -268,7 +271,10 @@ class _AddEditTodoBottomSheetState extends State<AddEditTodoBottomSheet> {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: const Text('Cancel'),
+              child: Text(
+                'Cancel',
+                style: TextStyle(color: Theme.of(context).primaryColor),
+              ),
             ),
             TextButton(
               onPressed: () {
@@ -277,7 +283,10 @@ class _AddEditTodoBottomSheetState extends State<AddEditTodoBottomSheet> {
                 });
                 Navigator.of(context).pop();
               },
-              child: const Text('Add Subtask'),
+              child: Text(
+                'Add Subtask',
+                style: TextStyle(color: Theme.of(context).primaryColor),
+              ),
             ),
           ],
         );
