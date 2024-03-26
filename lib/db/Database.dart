@@ -154,40 +154,6 @@ class DatabaseProvider {
     }).toList();
   }
 
-/*  Future<void> addTodo(Todo todo) async {
-    await _initializeDatabase();
-
-    final store = intMapStoreFactory.store(_todosStoreName);
-    final finder = Finder(filter: Filter.equals('key', todo.key));
-    final snapshot = await store.findFirst(_database, finder: finder);
-
-    if (snapshot == null) {
-      await store.add(_database, _todoToMap(todo));
-    } else {
-      await store.record(snapshot.key).update(_database, _todoToMap(todo));
-    }
-
-    // Ensure the database is closed after the operation
-    await _database.close();
-  }*/
-
-/*  Future<void> updateTodo(Todo updatedTodo) async {
-    await _initializeDatabase();
-
-    final store = intMapStoreFactory.store(_todosStoreName);
-    final finder = Finder(filter: Filter.equals('key', updatedTodo.key));
-    final snapshot = await store.findFirst(_database, finder: finder);
-
-    if (snapshot != null) {
-      await store.record(snapshot.key).update(_database, {
-        ...updatedTodo.toMap(),
-        'tag': updatedTodo.tag.toJson(), // Convert TagType to JSON
-      });
-    }
-
-    // Ensure the database is closed after the operation
-    await _database.close();
-  }*/
   Future<void> updateTodo(int id, Todo updatedTodo) async {
     await _initializeDatabase();
 
