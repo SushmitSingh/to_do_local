@@ -18,12 +18,12 @@ class TodoViewModel extends ChangeNotifier {
 
   TagType? get selectedTag => _selectedTag;
 
-  void setSelectedTag(TagType? tag) {
+  void setSelectedTag(TagType tag) {
     _selectedTag = tag;
-    if (tag?.tagName == "all") {
+    if (tag.tagName == "all") {
       _fetchTodos();
     } else {
-      fetchTodosByTag(tag!.tagName);
+      fetchTodosByTag(tag.tagName);
     }
     notifyListeners();
   }
@@ -40,7 +40,7 @@ class TodoViewModel extends ChangeNotifier {
   Future<List<TagType>> fetchTags() async {
     try {
       _tags = await _repository.getAllTags();
-      print(tags.toString() + "hiii");
+      print(_tags.toString() + "hiii"); // Corrected to _tags
       return _tags;
     } catch (error) {
       print('Error fetching tags $error');
@@ -88,12 +88,11 @@ class TodoViewModel extends ChangeNotifier {
       // Mark synced todos as synced
       for (var syncedTodo in unsyncedTodos) {
         syncedTodo.synced = true;
-        //await _repository.updateTodo(syncedTodo);
+        await _repository.updateTodo(syncedTodo.id!, syncedTodo);
       }
       await _fetchTodos(); // Refresh the local list after syncing
     } catch (error) {
       print('Error syncing with server: $error');
-      // Handle the error appropriately, e.g., show a snackbar or log it
     }
   }
 
@@ -117,7 +116,6 @@ class TodoViewModel extends ChangeNotifier {
 
   Future<void> updateTodo(int id, Todo todo) async {
     try {
-      // Update the todo in the database
       await _repository.updateTodo(id, todo);
 
       // Notify listeners to update the UI

@@ -1,7 +1,6 @@
 import 'package:path_provider/path_provider.dart';
 import 'package:sembast/sembast.dart';
 import 'package:sembast/sembast_io.dart';
-import 'package:sembast/timestamp.dart';
 
 import '../ui/task/model/Todo.dart';
 
@@ -17,6 +16,53 @@ class DatabaseProvider {
     _database = await _dbFactory.openDatabase(dbPath);
   }
 
+  Future<void> _closeDatabase() async {
+    await _database.close();
+  }
+
+  Future<void> clearDatabase() async {
+    await _initializeDatabase();
+
+    final store = intMapStoreFactory.store(_todosStoreName);
+    await store.delete(_database);
+
+    await _closeDatabase();
+  }
+
+  Future<void> addTodo(Todo todo) async {
+    await _initializeDatabase();
+
+    final store = intMapStoreFactory.store(_todosStoreName);
+    final finder = Finder(filter: Filter.equals('key', todo.key));
+    final snapshot = await store.findFirst(_database, finder: finder);
+
+    if (snapshot == null) {
+      final newTodoId = await store.add(_database, todo.toMap());
+      todo.id = newTodoId;
+    } else {
+      await store.record(snapshot.key).update(_database, todo.toMap());
+    }
+
+    await _closeDatabase();
+  }
+
+  Future<void> updateTodo(int id, Todo updatedTodo) async {
+    await _initializeDatabase();
+
+    final store = intMapStoreFactory.store(_todosStoreName);
+    final finder = Finder(filter: Filter.equals('id', id));
+    final snapshot = await store.findFirst(_database, finder: finder);
+
+    if (snapshot != null) {
+      await store.record(snapshot.key).update(_database, {
+        ...updatedTodo.toMap(),
+        'tag': updatedTodo.tag.toJson(),
+      });
+    }
+
+    await _closeDatabase();
+  }
+
   Future<List<Todo>> getAllTodos() async {
     await _initializeDatabase();
 
@@ -27,61 +73,41 @@ class DatabaseProvider {
     final todos = todosSnapshots.map((snapshot) {
       final List<dynamic>? subtasksData =
           snapshot['subtasks'] as List<dynamic>?;
-
       final Map<String, dynamic> tagData =
           snapshot['tag'] as Map<String, dynamic>;
-      final TagType tag = TagType.fromJson(tagData);
+      final TagType tag = TagType.fromMap(tagData);
 
-      final List<Subtask> subtasks = (subtasksData ?? []).map((data) {
-        return Subtask.fromMap(data as Map<String, dynamic>);
-      }).toList();
-
-      // Check if 'todoDate' is null or not a Timestamp
-      final todoDate = snapshot['todoDate'] != null &&
-              snapshot['todoDate'] is Timestamp
-          ? (snapshot['todoDate'] as Timestamp).toDateTime()
-          : DateTime
-              .now(); // Provide a default value if 'todoDate' is null or not a Timestamp
-
+      final todoDate = snapshot['todoDate'] as String;
       return Todo(
-        task: snapshot['task'] as String? ?? "",
-        key: snapshot['key'] as String? ?? "",
-        subtasks: subtasks,
-        todoDate: todoDate,
-        status: snapshot['status'] as String? ?? "",
+        id: snapshot['id'] as int?,
+        task: snapshot['task'] as String,
+        key: snapshot['key'] as String,
+        subtasks:
+            subtasksData?.map((data) => Subtask.fromMap(data)).toList() ?? [],
+        todoDate: DateTime.parse(todoDate),
+        status: snapshot['status'] as String,
         tag: tag,
+        synced: snapshot['synced'] as bool,
       );
     }).toList();
 
-    // Close the database after fetching data
-    await _database.close();
+    await _closeDatabase();
 
     return todos;
   }
 
-  Future<List<TagType>> getAllTagTypes() async {
+  Future<void> deleteTodoFromDatabase(Todo todo) async {
     await _initializeDatabase();
 
     final store = intMapStoreFactory.store(_todosStoreName);
-    final tagSnapshots = await store.find(_database);
+    final finder = Finder(filter: Filter.equals('key', todo.key));
+    final snapshot = await store.findFirst(_database, finder: finder);
 
-    await _database.close();
+    if (snapshot != null) {
+      await store.record(snapshot.key).delete(_database);
+    }
 
-    // Use a Set to store unique TagType objects
-    final tagSet = <String, TagType>{};
-
-    tagSnapshots.forEach((snapshot) {
-      final Map<String, dynamic>? tagData =
-          snapshot['tag'] as Map<String, dynamic>?;
-
-      if (tagData != null) {
-        final tag = TagType.fromMap(tagData);
-        tagSet[tag.tagName] = tag;
-      }
-    });
-
-    // Convert the Set to a List and return
-    return tagSet.values.toList();
+    await _closeDatabase();
   }
 
   Future<List<Todo>> getTodosByTagName(String selectedTag) async {
@@ -91,15 +117,13 @@ class DatabaseProvider {
     final finder = Finder(filter: Filter.equals('tag.tagName', selectedTag));
     final todosSnapshots = await store.find(_database, finder: finder);
 
-    // Ensure the database is closed after fetching data
-    await _database.close();
+    await _closeDatabase();
 
     return todosSnapshots.map((snapshot) {
       final List<dynamic> subtasksData = (snapshot['subtasks'] as List) ?? [];
       final List<Subtask> subtasks =
           subtasksData.map((data) => Subtask.fromMap(data)).toList();
 
-      // Deserialize TagType object
       final Map<String, dynamic> tagData =
           snapshot['tag'] as Map<String, dynamic>;
       final TagType tag = TagType.fromJson(tagData);
@@ -115,10 +139,9 @@ class DatabaseProvider {
     }).toList();
   }
 
-  Future<List<Todo>> geTTodosByDate(DateTime selectedDate) async {
+  Future<List<Todo>> getTodosByDate(DateTime selectedDate) async {
     await _initializeDatabase();
 
-    // Assuming selectedDate is a DateTime object
     final DateTime selectedDateTime =
         DateTime(selectedDate.year, selectedDate.month, selectedDate.day);
     final store = intMapStoreFactory.store(_todosStoreName);
@@ -135,8 +158,7 @@ class DatabaseProvider {
     );
     final todosSnapshots = await store.find(_database, finder: finder);
 
-    // Ensure the database is closed after fetching data
-    await _database.close();
+    await _closeDatabase();
 
     return todosSnapshots.map((snapshot) {
       final List<dynamic> subtasksData = (snapshot['subtasks'] as List) ?? [];
@@ -154,24 +176,6 @@ class DatabaseProvider {
     }).toList();
   }
 
-  Future<void> updateTodo(int id, Todo updatedTodo) async {
-    await _initializeDatabase();
-
-    final store = intMapStoreFactory.store(_todosStoreName);
-    final finder = Finder(filter: Filter.equals('id', id));
-    final snapshot = await store.findFirst(_database, finder: finder);
-
-    if (snapshot != null) {
-      await store.record(snapshot.key).update(_database, {
-        ...updatedTodo.toMap(),
-        'tag': updatedTodo.tag.toJson(), // Convert TagType to JSON
-      });
-    }
-
-    // Ensure the database is closed after the operation
-    await _database.close();
-  }
-
   Future<void> addTagType(TagType tagType) async {
     await _initializeDatabase();
 
@@ -180,43 +184,32 @@ class DatabaseProvider {
     final existingTag = await store.findFirst(_database, finder: finder);
 
     if (existingTag == null) {
-      final newTagId = await store.add(_database, tagType.toMap());
-      tagType.id = newTagId;
+      await store.add(_database, tagType.toMap());
     }
 
-    // Ensure the database is closed after the operation
-    await _database.close();
+    await _closeDatabase();
   }
 
-  Future<void> addTodo(Todo todo) async {
+  Future<List<TagType>> getAllTagTypes() async {
     await _initializeDatabase();
 
     final store = intMapStoreFactory.store(_todosStoreName);
-    final finder = Finder(filter: Filter.equals('key', todo.key));
-    final snapshot = await store.findFirst(_database, finder: finder);
+    final tagSnapshots = await store.find(_database);
 
-    if (snapshot == null) {
-      final newTodoId = await store.add(_database, todo.toMap());
-      todo.id = newTodoId;
-    } else {
-      await store.record(snapshot.key).update(_database, todo.toMap());
-    }
+    final tagSet = <String, TagType>{};
 
-    // Ensure the database is closed after the operation
-    await _database.close();
-  }
+    tagSnapshots.forEach((snapshot) {
+      final Map<String, dynamic>? tagData =
+          snapshot.value['tag'] as Map<String, dynamic>?;
 
-  Future<void> deleteTodoFromDatabase(Todo todo) async {
-    await _initializeDatabase();
+      if (tagData != null) {
+        final tag = TagType.fromMap(tagData);
+        tagSet[tag.tagName] = tag;
+      }
+    });
 
-    final store = intMapStoreFactory.store(_todosStoreName);
-    final finder = Finder(filter: Filter.equals('key', todo.key));
-    final snapshot = await store.findFirst(_database, finder: finder);
+    await _closeDatabase();
 
-    if (snapshot != null) {
-      await store.record(snapshot.key).delete(_database);
-    }
-
-    await _database.close();
+    return tagSet.values.toList();
   }
 }
