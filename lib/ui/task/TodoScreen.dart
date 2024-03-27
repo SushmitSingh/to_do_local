@@ -123,27 +123,21 @@ class _TodoListScreenState extends State<TodoListScreen> {
                           onTap: () {
                             _showAddTagTypeDialog(context);
                           },
-                          child: Card(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10.0),
-                            ),
-                            elevation: 1,
-                            child: const Padding(
-                              padding: EdgeInsets.all(5.0),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    Icons.add,
-                                    color: Colors.green,
-                                  ),
-                                  Text(
-                                    "Add Tag",
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                        fontSize: 14, color: Colors.green),
-                                  )
-                                ],
-                              ),
+                          child: const Padding(
+                            padding: EdgeInsets.all(5.0),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.add,
+                                  color: Colors.green,
+                                ),
+                                Text(
+                                  "Add Tag",
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                      fontSize: 14, color: Colors.green),
+                                )
+                              ],
                             ),
                           ),
                         );

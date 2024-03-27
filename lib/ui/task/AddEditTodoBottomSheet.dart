@@ -38,7 +38,7 @@ class _AddEditTodoBottomSheetState extends State<AddEditTodoBottomSheet> {
     if (widget.todo != null) {
       id = widget.todo!.id!;
       task = widget.todo!.task;
-      todoDate = widget.todo!.todoDate as DateTime;
+      todoDate = DateTime.fromMillisecondsSinceEpoch(widget.todo!.todoDate);
       status = widget.todo!.status;
       selectedTag = TagType(
           tagName: widget.todo!.tagId.toString(),
@@ -104,7 +104,7 @@ class _AddEditTodoBottomSheetState extends State<AddEditTodoBottomSheet> {
                     label: const Text("Add"),
                     onDeleted: () {
                       setState(() {
-                        _showAddSubtaskDialog(context, id);
+                        _showAddSubtaskDialog(context);
                       });
                     },
                   ),
@@ -253,7 +253,7 @@ class _AddEditTodoBottomSheetState extends State<AddEditTodoBottomSheet> {
     }
   }
 
-  void _showAddSubtaskDialog(BuildContext context, int id) {
+  void _showAddSubtaskDialog(BuildContext context) {
     String subtaskName = '';
 
     showDialog(
@@ -280,8 +280,7 @@ class _AddEditTodoBottomSheetState extends State<AddEditTodoBottomSheet> {
             TextButton(
               onPressed: () {
                 setState(() {
-                  subtasks.add(
-                      Subtask(task: subtaskName, completed: false, todoId: id));
+                  subtasks.add(Subtask(task: subtaskName, completed: false));
                 });
                 Navigator.of(context).pop();
               },

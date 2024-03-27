@@ -44,14 +44,11 @@ class TagType {
 class Subtask {
   @PrimaryKey(autoGenerate: true)
   final int? id;
-
-  final int todoId; // Reference to Todo
   final String task;
   bool completed;
 
   Subtask({
     this.id,
-    required this.todoId,
     required this.task,
     this.completed = false,
   });

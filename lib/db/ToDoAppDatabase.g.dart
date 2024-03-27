@@ -303,7 +303,6 @@ class _$SubtaskDao extends SubtaskDao {
             'Subtask',
             (Subtask item) => <String, Object?>{
                   'id': item.id,
-                  'todoId': item.todoId,
                   'task': item.task,
                   'completed': item.completed ? 1 : 0
                 }),
@@ -313,7 +312,6 @@ class _$SubtaskDao extends SubtaskDao {
             ['id'],
             (Subtask item) => <String, Object?>{
                   'id': item.id,
-                  'todoId': item.todoId,
                   'task': item.task,
                   'completed': item.completed ? 1 : 0
                 }),
@@ -323,7 +321,6 @@ class _$SubtaskDao extends SubtaskDao {
             ['id'],
             (Subtask item) => <String, Object?>{
                   'id': item.id,
-                  'todoId': item.todoId,
                   'task': item.task,
                   'completed': item.completed ? 1 : 0
                 });
@@ -345,7 +342,6 @@ class _$SubtaskDao extends SubtaskDao {
     return _queryAdapter.queryList('SELECT * FROM Subtask WHERE todoId = ?1',
         mapper: (Map<String, Object?> row) => Subtask(
             id: row['id'] as int?,
-            todoId: row['todoId'] as int,
             task: row['task'] as String,
             completed: (row['completed'] as int) != 0),
         arguments: [todoId]);

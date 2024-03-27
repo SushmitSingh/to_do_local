@@ -61,10 +61,8 @@ class TodoViewModel extends ChangeNotifier {
   Future<void> completeTodo(Todo todo) async {
     try {
       final List<Subtask> completedSubtasks = todo.subtasks
-          .map((subtask) => Subtask(
-              task: subtask.task,
-              completed: subtask.completed,
-              todoId: todo.id!))
+          .map((subtask) =>
+              Subtask(task: subtask.task, completed: subtask.completed))
           .toList();
 
       final completedTodo = Todo(
