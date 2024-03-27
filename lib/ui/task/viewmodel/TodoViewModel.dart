@@ -74,7 +74,7 @@ class TodoViewModel extends ChangeNotifier {
         tagId: todo.tagId,
       );
 
-      await _repository.addTodo(completedTodo);
+      await _repository.updateTodo(completedTodo);
       await _fetchTodos();
     } catch (error) {
       print('Error completing todo: $error');
@@ -107,16 +107,16 @@ class TodoViewModel extends ChangeNotifier {
         tagId: todo.tagId,
       );
 
-      await _repository.addTodo(updatedTodo);
+      await _repository.updateTodo(updatedTodo);
       await _fetchTodos();
     } catch (error) {
       print('Error updating todo status: $error');
     }
   }
 
-  Future<void> updateTodo(int id, Todo todo) async {
+  Future<void> updateTodo(Todo todo) async {
     try {
-      await _repository.updateTodo(id, todo);
+      await _repository.updateTodo(todo);
 
       // Notify listeners to update the UI
       notifyListeners();

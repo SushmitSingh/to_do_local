@@ -8,6 +8,7 @@ import 'TagTypeDao.dart';
 
 part 'ToDoAppDatabase.g.dart';
 
+@TypeConverters([SubtaskConverter])
 @Database(version: 1, entities: [Todo, TagType, Subtask])
 abstract class ToDoAppDatabase extends FloorDatabase {
   TodoDao get todoDao;

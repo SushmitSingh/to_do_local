@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:floor/floor.dart';
 
 @entity
@@ -10,8 +12,7 @@ class Todo {
   final int todoDate;
   final String status;
   final int tagId; // Reference to TagType
-
-  @ignore // Ignoring subtasks for simplicity
+  @ColumnInfo(name: 'Subtask')
   final List<Subtask> subtasks;
 
   Todo({
@@ -23,6 +24,19 @@ class Todo {
     required this.tagId,
     this.subtasks = const [],
   });
+}
+
+class SubtaskConverter extends TypeConverter<List<Subtask>, String> {
+  @override
+  List<Subtask> decode(String databaseValue) {
+    List<dynamic> list = json.decode(databaseValue);
+    return list.map((e) => Subtask.fromJson(e)).toList();
+  }
+
+  @override
+  String encode(List<Subtask> value) {
+    return json.encode(value.map((e) => e.toJson()).toList());
+  }
 }
 
 @entity
@@ -52,4 +66,20 @@ class Subtask {
     required this.task,
     this.completed = false,
   });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'task': task,
+      'completed': completed,
+    };
+  }
+
+  factory Subtask.fromJson(Map<String, dynamic> json) {
+    return Subtask(
+      id: json['id'],
+      task: json['task'],
+      completed: json['completed'],
+    );
+  }
 }

@@ -247,7 +247,7 @@ class _AddEditTodoBottomSheetState extends State<AddEditTodoBottomSheet> {
 
     if (_todoTitle != "Create New") {
       // Assuming `id` is the index of the subtask you want to update
-      todoViewModel.updateTodo(id, newTodo);
+      todoViewModel.updateTodo(newTodo);
     } else {
       todoViewModel.addTodo(newTodo);
     }

@@ -13,7 +13,7 @@ class DatabaseProvider {
     await database.todoDao.insertTodo(todo);
   }
 
-  Future<void> updateTodo(int id, Todo updatedTodo) async {
+  Future<void> updateTodo(Todo updatedTodo) async {
     final database = await _initializeDatabase();
     await database.todoDao.updateTodo(updatedTodo);
   }

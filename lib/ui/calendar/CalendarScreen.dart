@@ -192,7 +192,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                         onChanged: (value) {
                                           todo.subtasks[subtaskIndex]
                                               .completed = value ?? false;
-                                          viewModel.updateTodo(todo.id!, todo);
+                                          viewModel.updateTodo(todo);
                                         },
                                       ),
                                       Text.rich(

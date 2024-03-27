@@ -89,11 +89,11 @@ class _$ToDoAppDatabase extends ToDoAppDatabase {
       },
       onCreate: (database, version) async {
         await database.execute(
-            'CREATE TABLE IF NOT EXISTS `Todo` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `task` TEXT NOT NULL, `key` TEXT NOT NULL, `todoDate` INTEGER NOT NULL, `status` TEXT NOT NULL, `tagId` INTEGER NOT NULL)');
+            'CREATE TABLE IF NOT EXISTS `Todo` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `task` TEXT NOT NULL, `key` TEXT NOT NULL, `todoDate` INTEGER NOT NULL, `status` TEXT NOT NULL, `tagId` INTEGER NOT NULL, `subtasks` TEXT NOT NULL)');
         await database.execute(
             'CREATE TABLE IF NOT EXISTS `TagType` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `tagName` TEXT NOT NULL, `iconCodePoint` INTEGER NOT NULL)');
         await database.execute(
-            'CREATE TABLE IF NOT EXISTS `Subtask` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `todoId` INTEGER NOT NULL, `task` TEXT NOT NULL, `completed` INTEGER NOT NULL)');
+            'CREATE TABLE IF NOT EXISTS `Subtask` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `task` TEXT NOT NULL, `completed` INTEGER NOT NULL)');
 
         await callback?.onCreate?.call(database, version);
       },
@@ -131,7 +131,8 @@ class _$TodoDao extends TodoDao {
                   'key': item.key,
                   'todoDate': item.todoDate,
                   'status': item.status,
-                  'tagId': item.tagId
+                  'tagId': item.tagId,
+                  'subtasks': _subtaskConverter.encode(item.subtasks)
                 }),
         _todoUpdateAdapter = UpdateAdapter(
             database,
@@ -143,7 +144,8 @@ class _$TodoDao extends TodoDao {
                   'key': item.key,
                   'todoDate': item.todoDate,
                   'status': item.status,
-                  'tagId': item.tagId
+                  'tagId': item.tagId,
+                  'subtasks': _subtaskConverter.encode(item.subtasks)
                 }),
         _todoDeletionAdapter = DeletionAdapter(
             database,
@@ -155,7 +157,8 @@ class _$TodoDao extends TodoDao {
                   'key': item.key,
                   'todoDate': item.todoDate,
                   'status': item.status,
-                  'tagId': item.tagId
+                  'tagId': item.tagId,
+                  'subtasks': _subtaskConverter.encode(item.subtasks)
                 });
 
   final sqflite.DatabaseExecutor database;
@@ -179,7 +182,8 @@ class _$TodoDao extends TodoDao {
             key: row['key'] as String,
             todoDate: row['todoDate'] as int,
             status: row['status'] as String,
-            tagId: row['tagId'] as int));
+            tagId: row['tagId'] as int,
+            subtasks: _subtaskConverter.decode(row['subtasks'] as String)));
   }
 
   @override
@@ -191,7 +195,8 @@ class _$TodoDao extends TodoDao {
             key: row['key'] as String,
             todoDate: row['todoDate'] as int,
             status: row['status'] as String,
-            tagId: row['tagId'] as int),
+            tagId: row['tagId'] as int,
+            subtasks: _subtaskConverter.decode(row['subtasks'] as String)),
         arguments: [tagId]);
   }
 
@@ -204,7 +209,8 @@ class _$TodoDao extends TodoDao {
             key: row['key'] as String,
             todoDate: row['todoDate'] as int,
             status: row['status'] as String,
-            tagId: row['tagId'] as int),
+            tagId: row['tagId'] as int,
+            subtasks: _subtaskConverter.decode(row['subtasks'] as String)),
         arguments: [date]);
   }
 
@@ -362,3 +368,6 @@ class _$SubtaskDao extends SubtaskDao {
     await _subtaskDeletionAdapter.delete(subtask);
   }
 }
+
+// ignore_for_file: unused_element
+final _subtaskConverter = SubtaskConverter();
