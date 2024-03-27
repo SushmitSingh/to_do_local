@@ -65,7 +65,7 @@ class Repository {
 
   Future<List<Todo>> getTodosByDate(DateTime selectedDate) async {
     try {
-      return await _databaseProvider.getTodosByDate(selectedDate);
+      return await _databaseProvider.getTodosByDate(selectedDate.millisecond);
     } catch (error) {
       print('Error getting todos by date from database: $error');
       return [];

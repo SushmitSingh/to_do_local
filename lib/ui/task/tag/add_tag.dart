@@ -87,7 +87,7 @@ class _AddTagState extends State<AddTag> {
               onPressed: () {
                 final newTagType = TagType(
                   tagName: _tagTypeController.text,
-                  icon: Icons.tag,
+                  iconCodePoint: Icons.tag.codePoint,
                 );
 
                 Provider.of<TodoViewModel>(context, listen: false)

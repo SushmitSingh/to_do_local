@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart' as intl;
 import 'package:provider/provider.dart';
 
 import 'AddEditTodoBottomSheet.dart';
@@ -59,7 +58,7 @@ class _TodoListScreenState extends State<TodoListScreen> {
                           onTap: () {
                             viewModel.setSelectedTag(TagType(
                               tagName: "all",
-                              icon: Icons.all_inbox,
+                              iconCodePoint: Icons.all_inbox.codePoint,
                             ));
                           },
                           child: Card(
@@ -106,7 +105,7 @@ class _TodoListScreenState extends State<TodoListScreen> {
                               padding: const EdgeInsets.all(5.0),
                               child: Row(
                                 children: [
-                                  Icon(tag.icon),
+                                  Icon(IconData(tag.iconCodePoint)),
                                   Text(
                                     tag.tagName,
                                     textAlign: TextAlign.center,
@@ -301,7 +300,7 @@ class _TodoListScreenState extends State<TodoListScreen> {
                                                             .withAlpha(100)),
                                                   ),
                                                   Text(
-                                                    todo.tag.tagName,
+                                                    todo.tagId.toString(),
                                                     style: const TextStyle(
                                                         fontSize: 14,
                                                         color: Colors.grey),
@@ -324,8 +323,7 @@ class _TodoListScreenState extends State<TodoListScreen> {
                                                             .withAlpha(100)),
                                                   ),
                                                   Text(
-                                                    intl.DateFormat.yMMMEd()
-                                                        .format(todo.todoDate),
+                                                    todo.todoDate.toString(),
                                                     style: const TextStyle(
                                                         fontSize: 12,
                                                         color: Colors.grey),
@@ -444,7 +442,7 @@ class _TodoListScreenState extends State<TodoListScreen> {
               onPressed: () {
                 final newTagType = TagType(
                   tagName: _tagTypeController.text,
-                  icon: Icons.tag,
+                  iconCodePoint: Icons.tag.codePoint,
                 );
 
                 Provider.of<TodoViewModel>(context, listen: false)

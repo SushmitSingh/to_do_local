@@ -38,15 +38,16 @@ class _AddEditTodoBottomSheetState extends State<AddEditTodoBottomSheet> {
     if (widget.todo != null) {
       id = widget.todo!.id!;
       task = widget.todo!.task;
-      todoDate = widget.todo!.todoDate;
+      todoDate = widget.todo!.todoDate as DateTime;
       status = widget.todo!.status;
       selectedTag = TagType(
-          tagName: widget.todo!.tag.tagName, icon: widget.todo!.tag.icon);
+          tagName: widget.todo!.tagId.toString(),
+          iconCodePoint: widget.todo!.tagId);
       subtasks.addAll(widget.todo!.subtasks);
     } else {
       selectedTag = TagType(
         tagName: "Regular",
-        icon: Icons.add,
+        iconCodePoint: Icons.add.codePoint,
       );
     }
   }
@@ -103,7 +104,7 @@ class _AddEditTodoBottomSheetState extends State<AddEditTodoBottomSheet> {
                     label: const Text("Add"),
                     onDeleted: () {
                       setState(() {
-                        _showAddSubtaskDialog(context);
+                        _showAddSubtaskDialog(context, id);
                       });
                     },
                   ),
@@ -236,9 +237,9 @@ class _AddEditTodoBottomSheetState extends State<AddEditTodoBottomSheet> {
       task: task,
       key: widget.todo?.key ?? DateTime.now().millisecondsSinceEpoch.toString(),
       subtasks: subtasks,
-      todoDate: todoDate,
+      todoDate: todoDate.millisecond,
       status: status,
-      tag: TagType(tagName: selectedTag.tagName, icon: selectedTag.icon),
+      tagId: selectedTag.id!,
     );
 
     widget.onUpdateTodo(newTodo);
@@ -252,7 +253,7 @@ class _AddEditTodoBottomSheetState extends State<AddEditTodoBottomSheet> {
     }
   }
 
-  void _showAddSubtaskDialog(BuildContext context) {
+  void _showAddSubtaskDialog(BuildContext context, int id) {
     String subtaskName = '';
 
     showDialog(
@@ -279,7 +280,8 @@ class _AddEditTodoBottomSheetState extends State<AddEditTodoBottomSheet> {
             TextButton(
               onPressed: () {
                 setState(() {
-                  subtasks.add(Subtask(task: subtaskName, completed: false));
+                  subtasks.add(
+                      Subtask(task: subtaskName, completed: false, todoId: id));
                 });
                 Navigator.of(context).pop();
               },

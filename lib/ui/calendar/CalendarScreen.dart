@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart' as intl;
 import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
 
@@ -247,7 +246,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                                             .withAlpha(100)),
                                                   ),
                                                   Text(
-                                                    todo.tag.tagName,
+                                                    todo.tagId.toString(),
                                                     style: const TextStyle(
                                                         fontSize: 14,
                                                         color: Colors.grey),
@@ -270,8 +269,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                                             .withAlpha(100)),
                                                   ),
                                                   Text(
-                                                    intl.DateFormat.yMMMEd()
-                                                        .format(todo.todoDate),
+                                                    todo.todoDate.toString(),
                                                     style: const TextStyle(
                                                         fontSize: 12,
                                                         color: Colors.grey),

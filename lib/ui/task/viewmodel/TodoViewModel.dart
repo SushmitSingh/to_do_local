@@ -61,8 +61,10 @@ class TodoViewModel extends ChangeNotifier {
   Future<void> completeTodo(Todo todo) async {
     try {
       final List<Subtask> completedSubtasks = todo.subtasks
-          .map((subtask) =>
-              Subtask(task: subtask.task, completed: subtask.completed))
+          .map((subtask) => Subtask(
+              task: subtask.task,
+              completed: subtask.completed,
+              todoId: todo.id!))
           .toList();
 
       final completedTodo = Todo(
@@ -71,7 +73,7 @@ class TodoViewModel extends ChangeNotifier {
         subtasks: completedSubtasks,
         todoDate: todo.todoDate,
         status: 'completed',
-        tag: todo.tag,
+        tagId: todo.tagId,
       );
 
       await _repository.addTodo(completedTodo);
@@ -83,13 +85,13 @@ class TodoViewModel extends ChangeNotifier {
 
   Future<void> syncWithServer() async {
     try {
-      // Retrieve the todos that need to be synced (e.g., unsynced or modified)
+      /* // Retrieve the todos that need to be synced (e.g., unsynced or modified)
       List<Todo> unsyncedTodos = _todos.where((todo) => !todo.synced).toList();
       // Mark synced todos as synced
-      for (var syncedTodo in unsyncedTodos) {
+     for (var syncedTodo in unsyncedTodos) {
         syncedTodo.synced = true;
         await _repository.updateTodo(syncedTodo.id!, syncedTodo);
-      }
+      }*/
       await _fetchTodos(); // Refresh the local list after syncing
     } catch (error) {
       print('Error syncing with server: $error');
@@ -104,7 +106,7 @@ class TodoViewModel extends ChangeNotifier {
         subtasks: todo.subtasks,
         todoDate: todo.todoDate,
         status: newStatus,
-        tag: todo.tag,
+        tagId: todo.tagId,
       );
 
       await _repository.addTodo(updatedTodo);
