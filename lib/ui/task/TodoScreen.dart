@@ -183,7 +183,8 @@ class _TodoListScreenState extends State<TodoListScreen> {
                                 value: todo.status == 'completed',
                                 onChanged: (value) {
                                   if (value != null && value) {
-                                    viewModel.completeTodo(todo);
+                                    viewModel.updateTodoStatus(
+                                        todo, 'completed');
                                   } else {
                                     viewModel.updateTodoStatus(todo, 'pending');
                                   }

@@ -1,18 +1,17 @@
-import 'dart:convert';
-
 import 'package:floor/floor.dart';
+
+import '../../../db/SubtaskListConverter.dart';
 
 @entity
 class Todo {
   @PrimaryKey(autoGenerate: true)
   final int? id;
-
   final String task;
   final String key;
   final int todoDate;
   final String status;
   final int tagId; // Reference to TagType
-  @ColumnInfo(name: 'Subtask')
+  @TypeConverters([SubtaskListConverter])
   final List<Subtask> subtasks;
 
   Todo({
@@ -24,19 +23,6 @@ class Todo {
     required this.tagId,
     this.subtasks = const [],
   });
-}
-
-class SubtaskConverter extends TypeConverter<List<Subtask>, String> {
-  @override
-  List<Subtask> decode(String databaseValue) {
-    List<dynamic> list = json.decode(databaseValue);
-    return list.map((e) => Subtask.fromJson(e)).toList();
-  }
-
-  @override
-  String encode(List<Subtask> value) {
-    return json.encode(value.map((e) => e.toJson()).toList());
-  }
 }
 
 @entity
