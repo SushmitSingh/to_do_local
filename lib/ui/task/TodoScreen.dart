@@ -49,45 +49,10 @@ class _TodoListScreenState extends State<TodoListScreen> {
                   return ListView.builder(
                     scrollDirection: Axis.horizontal,
                     itemCount: viewModel.tags.length +
-                        2, // Add 2 for the "Add Tag" chips
+                        1, // Add 2 for the "Add Tag" chips
                     itemBuilder: (context, index) {
-                      if (index == 0) {
-                        var isSelected =
-                            viewModel.selectedTag?.tagName == "all";
-                        return GestureDetector(
-                          onTap: () {
-                            viewModel.setSelectedTag(TagType(
-                              tagName: "all",
-                              iconCodePoint: Icons.all_inbox.codePoint,
-                            ));
-                          },
-                          child: Card(
-                            color: isSelected
-                                ? Theme.of(context).primaryColor
-                                : null,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10.0),
-                            ),
-                            elevation: 1,
-                            child: const Padding(
-                              padding: EdgeInsets.all(5.0),
-                              child: Row(
-                                children: [
-                                  Icon(Icons.all_inbox),
-                                  Text(
-                                    "All",
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                    ),
-                                  )
-                                ],
-                              ),
-                            ),
-                          ),
-                        );
-                      } else if (index <= viewModel.tags.length) {
-                        final tag = viewModel.tags[index - 1];
+                      if (index <= viewModel.tags.length - 1) {
+                        final tag = viewModel.tags[index];
                         final isSelected = viewModel.selectedTag == tag;
                         return GestureDetector(
                           onTap: () {
@@ -129,13 +94,13 @@ class _TodoListScreenState extends State<TodoListScreen> {
                               children: [
                                 Icon(
                                   Icons.add,
-                                  color: Colors.green,
+                                  color: Colors.yellow,
                                 ),
                                 Text(
                                   "Add Tag",
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
-                                      fontSize: 14, color: Colors.green),
+                                      fontSize: 14, color: Colors.yellow),
                                 )
                               ],
                             ),
@@ -180,14 +145,23 @@ class _TodoListScreenState extends State<TodoListScreen> {
                                   }
                                   return Colors.white;
                                 }),
-                                value: todo.status == 'completed',
+                                value: todo.status,
                                 onChanged: (value) {
-                                  if (value != null && value) {
-                                    viewModel.updateTodoStatus(
-                                        todo, 'completed');
-                                  } else {
-                                    viewModel.updateTodoStatus(todo, 'pending');
-                                  }
+                                  viewModel.updateTodo(
+                                    Todo(
+                                      id: id,
+                                      task: todo.task,
+                                      key: todo.key,
+                                      todoDate: todo.todoDate,
+                                      status: value ?? false,
+                                      tagId: todo.tagId,
+                                      subtasks: todo.subtasks,
+                                    ),
+                                  );
+                                  //update the status of the todo
+                                  setState(() {
+                                    todo.status = value ?? false;
+                                  });
                                 },
                               ),
                               Flexible(
@@ -197,15 +171,13 @@ class _TodoListScreenState extends State<TodoListScreen> {
                                     overflow: TextOverflow.fade,
                                     fontWeight: FontWeight.normal,
                                     fontSize: 16,
-                                    color: todo.status == 'completed'
-                                        ? Colors.green.shade600
-                                        : todo.status == 'expired'
-                                            ? Colors.red
-                                            : Theme.of(context)
-                                                .textTheme
-                                                .bodyMedium
-                                                ?.color,
-                                    decoration: todo.status == 'completed'
+                                    color: todo.status
+                                        ? Colors.grey
+                                        : Theme.of(context)
+                                            .textTheme
+                                            .bodyMedium
+                                            ?.color,
+                                    decoration: todo.status == true
                                         ? TextDecoration.lineThrough
                                         : TextDecoration.none,
                                   ),

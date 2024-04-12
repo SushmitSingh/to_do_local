@@ -30,7 +30,11 @@ class TodoViewModel extends ChangeNotifier {
 
   Future<void> _fetchTodos() async {
     try {
-      _todos = await _repository.getTodos();
+      if (selectedTag == null) {
+        _todos = await _repository.getTodos();
+      } else {
+        fetchTodosByTag(selectedTag!.tagName);
+      }
       notifyListeners();
     } catch (error) {
       print('Error fetching todos: $error');
@@ -70,7 +74,7 @@ class TodoViewModel extends ChangeNotifier {
         key: todo.key,
         subtasks: completedSubtasks,
         todoDate: todo.todoDate,
-        status: 'completed',
+        status: todo.status,
         tagId: todo.tagId,
       );
 
@@ -96,7 +100,7 @@ class TodoViewModel extends ChangeNotifier {
     }
   }
 
-  Future<void> updateTodoStatus(Todo todo, String newStatus) async {
+  Future<void> updateTodoStatus(Todo todo, bool newStatus) async {
     try {
       final updatedTodo = Todo(
         task: todo.task,
@@ -108,7 +112,7 @@ class TodoViewModel extends ChangeNotifier {
       );
 
       await _repository.updateTodo(updatedTodo);
-      await _fetchTodos();
+      notifyListeners();
     } catch (error) {
       print('Error updating todo status: $error');
     }
@@ -117,6 +121,7 @@ class TodoViewModel extends ChangeNotifier {
   Future<void> updateTodo(Todo todo) async {
     try {
       await _repository.updateTodo(todo);
+      await _fetchTodos();
 
       // Notify listeners to update the UI
       notifyListeners();

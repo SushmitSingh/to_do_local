@@ -19,7 +19,7 @@ class _AddEditTodoBottomSheetState extends State<AddEditTodoBottomSheet> {
   final TextEditingController _tagTypeController = TextEditingController();
   String task = '';
   DateTime todoDate = DateTime.now();
-  String status = 'pending';
+  bool status = false;
   late TagType selectedTag;
   List<Subtask> subtasks = [];
   late int id;
@@ -119,18 +119,17 @@ class _AddEditTodoBottomSheetState extends State<AddEditTodoBottomSheet> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         const Text('Status'),
-                        DropdownButton<String>(
+                        DropdownButton<bool>(
                           value: status,
                           onChanged: (value) {
                             setState(() {
                               status = value!;
                             });
                           },
-                          items:
-                              ['pending', 'completed', 'other'].map((status) {
-                            return DropdownMenuItem<String>(
-                              value: status,
-                              child: Text(status),
+                          items: const [true, false].map((value) {
+                            return DropdownMenuItem<bool>(
+                              value: value,
+                              child: Text(value ? 'Completed' : 'Pending'),
                             );
                           }).toList(),
                         ),
@@ -232,8 +231,8 @@ class _AddEditTodoBottomSheetState extends State<AddEditTodoBottomSheet> {
     return await todoViewModel.fetchTags();
   }
 
-  void _saveTodo() {
-    final newTodo = Todo(
+  /*void _saveTodo() {
+    final todo = Todo(
       task: task,
       key: widget.todo?.key ?? DateTime.now().millisecondsSinceEpoch.toString(),
       subtasks: subtasks,
@@ -242,14 +241,34 @@ class _AddEditTodoBottomSheetState extends State<AddEditTodoBottomSheet> {
       tagId: selectedTag.id!,
     );
 
-    widget.onUpdateTodo(newTodo);
+    widget.onUpdateTodo(todo);
     final todoViewModel = Provider.of<TodoViewModel>(context, listen: false);
 
     if (_todoTitle != "Create New") {
       // Assuming `id` is the index of the subtask you want to update
-      todoViewModel.updateTodo(newTodo);
+      todoViewModel.updateTodo(todo);
     } else {
-      todoViewModel.addTodo(newTodo);
+      todoViewModel.addTodo(todo);
+    }
+  }*/
+
+  void _saveTodo() {
+    final todo = Todo(
+      task: task,
+      key: widget.todo?.key ?? DateTime.now().millisecondsSinceEpoch.toString(),
+      subtasks: subtasks,
+      todoDate: todoDate.millisecondsSinceEpoch,
+      status: status,
+      tagId: selectedTag.iconCodePoint,
+    );
+
+    widget.onUpdateTodo(todo);
+    final todoViewModel = Provider.of<TodoViewModel>(context, listen: false);
+
+    if (widget.todo != null) {
+      todoViewModel.updateTodo(todo);
+    } else {
+      todoViewModel.addTodo(todo);
     }
   }
 

@@ -1,11 +1,20 @@
 import 'dart:async';
 
+import 'package:floor/floor.dart';
+
 import '../ui/task/model/Todo.dart';
 import 'ToDoAppDatabase.dart';
 
 class DatabaseProvider {
   Future<ToDoAppDatabase> _initializeDatabase() async {
-    return $FloorToDoAppDatabase.databaseBuilder('app_database.db').build();
+    return $FloorToDoAppDatabase
+        .databaseBuilder('app_database.db')
+        .addMigrations([
+      Migration(1, 2, (database) async {
+        //update TODO table where status was string to int
+        await database.execute('ALTER TABLE Todo UPDATE COLUMN status INTEGER');
+      })
+    ]).build();
   }
 
   Future<void> addTodo(Todo todo) async {

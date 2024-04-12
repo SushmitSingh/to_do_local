@@ -24,6 +24,7 @@ class Repository {
   Future<void> updateTodo(Todo processedTodo) async {
     try {
       await _databaseProvider.updateTodo(processedTodo);
+      print('Todo updated in database');
     } catch (error) {
       print('Error updating todo in database: $error');
     }

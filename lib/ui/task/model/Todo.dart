@@ -9,7 +9,7 @@ class Todo {
   final String task;
   final String key;
   final int todoDate;
-  final String status;
+  bool status;
   final int tagId; // Reference to TagType
   @TypeConverters([SubtaskListConverter])
   final List<Subtask> subtasks;

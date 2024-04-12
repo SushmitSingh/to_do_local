@@ -137,7 +137,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                   if (value != null && value) {
                                     viewModel.completeTodo(todo);
                                   } else {
-                                    viewModel.updateTodoStatus(todo, 'pending');
+                                    viewModel.updateTodoStatus(todo, false);
                                   }
                                 },
                               ),
