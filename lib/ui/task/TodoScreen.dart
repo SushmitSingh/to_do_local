@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
 
 import 'AddEditTodoBottomSheet.dart';
@@ -43,7 +44,7 @@ class _TodoListScreenState extends State<TodoListScreen> {
           Padding(
             padding: const EdgeInsets.all(5.0),
             child: SizedBox(
-              height: 50,
+              height: 40,
               child: Consumer<TodoViewModel>(
                 builder: (context, viewModel, child) {
                   return ListView.builder(
@@ -70,12 +71,24 @@ class _TodoListScreenState extends State<TodoListScreen> {
                               padding: const EdgeInsets.all(5.0),
                               child: Row(
                                 children: [
-                                  Icon(IconData(tag.iconCodePoint)),
+                                  Icon(
+                                    IconData(tag.iconCodePoint,
+                                        fontFamily: 'MaterialIcons'),
+                                    color: isSelected
+                                        ? Colors.white
+                                        : Theme.of(context).primaryColor,
+                                  ),
                                   Text(
                                     tag.tagName,
                                     textAlign: TextAlign.center,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontSize: 14,
+                                      color: isSelected
+                                          ? Colors.white
+                                          : Theme.of(context)
+                                              .textTheme
+                                              .bodyMedium
+                                              ?.color,
                                     ),
                                   )
                                 ],
@@ -395,21 +408,69 @@ class _TodoListScreenState extends State<TodoListScreen> {
   }
 
   void _showAddTagTypeDialog(BuildContext context) {
+    IconData selectedIcon = Icons.tag;
+    final todoViewModel = Provider.of<TodoViewModel>(context, listen: false);
+    List<IconData> iconDataList = todoViewModel.getIconDataList();
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Create New Tag'),
-          content: TextField(
-            controller: _tagTypeController,
-            decoration: const InputDecoration(labelText: 'Tag Name'),
+          content: Row(
+            children: [
+              Container(
+                width: 280, // Set the width as needed
+                height: 400, // Set the height as needed
+                child: Scrollable(
+                  scrollBehavior: const MaterialScrollBehavior(),
+                  viewportBuilder:
+                      (BuildContext context, ViewportOffset position) {
+                    return Column(
+                      children: [
+                        TextField(
+                          controller: _tagTypeController,
+                          decoration: const InputDecoration(
+                            labelText: 'Tag Name',
+                          ),
+                        ),
+                        GridView.builder(
+                          shrinkWrap: true,
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 5,
+                          ),
+                          itemCount: iconDataList.length,
+                          itemBuilder: (context, index) {
+                            return GestureDetector(
+                              onTap: () {
+                                // Set the selected item with  color to the primary color
+                                setState(() {
+                                  selectedIcon = iconDataList[index];
+                                });
+                              },
+                              child: Icon(
+                                iconDataList[index],
+                                color: selectedIcon == iconDataList[index]
+                                    ? Theme.of(context).primaryColor
+                                    : Colors.grey,
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ),
+            ],
           ),
           actions: [
             ElevatedButton(
               onPressed: () {
                 final newTagType = TagType(
                   tagName: _tagTypeController.text,
-                  iconCodePoint: Icons.tag.codePoint,
+                  iconCodePoint: selectedIcon.codePoint,
                 );
 
                 Provider.of<TodoViewModel>(context, listen: false)

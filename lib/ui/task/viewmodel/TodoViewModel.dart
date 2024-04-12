@@ -160,4 +160,43 @@ class TodoViewModel extends ChangeNotifier {
     await _fetchTodos();
     notifyListeners();
   }
+
+  List<IconData> getIconDataList() {
+    return [
+      Icons.star,
+      Icons.favorite,
+      Icons.home,
+      Icons.work,
+      Icons.school,
+      Icons.shopping_cart,
+      Icons.restaurant,
+      Icons.directions_bike,
+      Icons.directions_bus,
+      Icons.directions_car,
+      Icons.directions_boat,
+      Icons.directions_railway,
+      Icons.directions_walk,
+      Icons.local_airport,
+      Icons.local_atm,
+      Icons.local_bar,
+      Icons.local_cafe,
+      Icons.local_car_wash,
+      Icons.local_convenience_store,
+      Icons.local_dining,
+      Icons.local_drink,
+      Icons.local_florist,
+      Icons.local_gas_station,
+      Icons.local_grocery_store,
+      Icons.local_hospital,
+      Icons.local_hotel,
+      Icons.local_laundry_service,
+      Icons.local_library,
+      Icons.local_mall,
+      Icons.local_movies,
+      Icons.local_offer,
+      Icons.local_parking,
+      Icons.local_pharmacy,
+      Icons.local_phone,
+    ];
+  }
 }
