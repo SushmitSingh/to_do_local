@@ -39,7 +39,3 @@ Some important packages in this project:
 | `shelf`, `shelf_router`  | Local API testing (mock server)      |
 | `shared_preferences`     | Key-value persistent storage         |
 | `flutter_native_splash` | Custom splash screen configuration   |
-
----
-
-## 📁 Folder Structure
